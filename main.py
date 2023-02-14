@@ -28,6 +28,7 @@ while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
     dt = kell.tick(60) / 1000
     keys = pygame.key.get_pressed()
+    left_click, middle_click, right_click = pygame.mouse.get_pressed()
 
     selected_x = hiire_x // 40 * 40 - global_x % 40
     selected_y = hiire_y // 40 * 40 - global_y % 40
@@ -47,12 +48,12 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            valitud_x = 40 * round(int(global_x + selected_x) / 40)
-            valitud_y = 40 * round(int(global_y + selected_y) / 40)
-            if (valitud_x, valitud_y) in blocks_dict:
-                blocks_dict[(valitud_x, valitud_y)].kill()
-                blocks_dict.pop((valitud_x, valitud_y))
+    if left_click:
+        valitud_x = 40 * round(int(global_x + selected_x) / 40)
+        valitud_y = 40 * round(int(global_y + selected_y) / 40)
+        if (valitud_x, valitud_y) in blocks_dict:
+            blocks_dict[(valitud_x, valitud_y)].kill()
+            blocks_dict.pop((valitud_x, valitud_y))
     if keys[pygame.K_d]:
         global_x += speed * dt
     if keys[pygame.K_a]:
