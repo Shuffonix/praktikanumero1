@@ -18,8 +18,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    mouse_x = hiire_x//40 * 40 - (global_x % 40 - 2)
-    mouse_y = hiire_y//40 * 40 - (global_y % 40 - 2)
+    mouse_x = hiire_x//40 * 40 - (global_x % 40) + 2
+    mouse_y = hiire_y//40 * 40 - (global_y % 40) + 2
     if keys[pygame.K_d]:
         global_x += speed * dt
     if keys[pygame.K_a]:
@@ -34,7 +34,5 @@ while running:
     for bg_y in range(-80 - int(global_y % 80), 560, 20):
         pygame.draw.line(screen, (225, 225, 225), (0, bg_y), (640, bg_y), 2)
     pygame.draw.rect(screen, (0, 0, 0), (int(mouse_x), int(mouse_y), 40, 40), 3)
-    if hiire_x < mouse_x:
-        print("mdv")
     pygame.display.flip()
 pygame.quit()
