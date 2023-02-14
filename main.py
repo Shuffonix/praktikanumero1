@@ -10,10 +10,14 @@ speed = 100
 mouse_x = 0
 mouse_y = 0
 blocks = []
-
+selected_block = pygame.Surface(size=(42, 42))
+selected_block.fill((255, 0, 0))
+selected_block.set_colorkey((255, 0, 0))
+pygame.draw.rect(selected_block, (0, 0, 0), (0, 0, 42, 42), 3)
+timer = 1
 while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
-    dt = kell.tick() / 1000
+    dt = kell.tick(60) / 1000
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -26,13 +30,20 @@ while running:
         global_y += speed * dt
     if keys[pygame.K_w]:
         global_y -= speed * dt
-    mouse_x = hiire_x//40 * 40 - (global_x % 40) + 2
-    mouse_y = hiire_y//40 * 40 - (global_y % 40) + 2
+
+    mouse_x = hiire_x//40 * 40 - global_x % 40 + 2
+    mouse_y = hiire_y//40 * 40 - global_y % 40 + 2
+    if hiire_y - mouse_y > 40:
+        mouse_y += 40
+    if hiire_x - mouse_x > 40:
+        mouse_x += 40
+
     screen.fill((255, 255, 255))
     for bg_x in range(-80 - int(global_x % 80), 720, 20):
         pygame.draw.line(screen, (225, 225, 225), (bg_x, 0), (bg_x, 480), 2)
     for bg_y in range(-80 - int(global_y % 80), 560, 20):
         pygame.draw.line(screen, (225, 225, 225), (0, bg_y), (640, bg_y), 2)
-    pygame.draw.rect(screen, (0, 0, 0), (int(mouse_x), int(mouse_y), 40, 40), 3)
+    screen.blit(selected_block, (mouse_x - 2, mouse_y - 2))
+
     pygame.display.flip()
 pygame.quit()
