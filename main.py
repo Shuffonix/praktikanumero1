@@ -31,6 +31,6 @@ while running:
         pygame.draw.line(screen, (225, 225, 225), (bg_x, 0), (bg_x, 480), 2)
     for bg_y in range(-80 - int(character_y % 80), 560, 20):
         pygame.draw.line(screen, (225, 225, 225), (0, bg_y), (640, bg_y), 2)
-    pygame.draw.rect(screen, (0, 0, 0), (mouse_x, mouse_y, 40, 40), 3)
+    pygame.draw.rect(screen, (0, 0, 0), (mouse_x-(character_x%40)+1, mouse_y-(character_y%40), 40, 40), 3)
     pygame.display.flip()
 pygame.quit()
