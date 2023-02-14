@@ -1,7 +1,7 @@
 import pygame
 
 
-screen = pygame.display.set_mode((640, 480))
+screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 running = True
 character_x = 0
 character_y = 0
