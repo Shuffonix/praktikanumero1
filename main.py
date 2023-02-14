@@ -2,14 +2,15 @@ import pygame
 
 
 screen = pygame.display.set_mode((640, 480))
+kell = pygame.time.Clock()
 running = True
 global_x = 0
 global_y = 0
 speed = 100
-kell = pygame.time.Clock()
 mouse_x = 0
 mouse_y = 0
 blocks = []
+
 while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
     dt = kell.tick() / 1000
@@ -17,9 +18,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    mouse_x = hiire_x//40 * 40 - (global_x % 40) + 2
-    mouse_y = hiire_y//40 * 40 - (global_y % 40) + 2
     if keys[pygame.K_d]:
         global_x += speed * dt
     if keys[pygame.K_a]:
@@ -28,6 +26,8 @@ while running:
         global_y += speed * dt
     if keys[pygame.K_w]:
         global_y -= speed * dt
+    mouse_x = hiire_x//40 * 40 - (global_x % 40) + 2
+    mouse_y = hiire_y//40 * 40 - (global_y % 40) + 2
     screen.fill((255, 255, 255))
     for bg_x in range(-80 - int(global_x % 80), 720, 20):
         pygame.draw.line(screen, (225, 225, 225), (bg_x, 0), (bg_x, 480), 2)
