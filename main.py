@@ -19,7 +19,7 @@ pygame.draw.rect(selected_block, (0, 0, 0), (0, 0, 42, 42), 3)
 blocks_dict = {}
 blocks = pygame.sprite.Group()
 for y in range(320, 2300, 40):
-    for x in range(-1000, 100, 40):
+    for x in range(-1000, 1000, 40):
         block = Block(x, y)
         blocks_dict[block.id] = block
         blocks.add(block)
@@ -48,10 +48,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            valitud = blocks_dict[(40 * round(int(global_x + selected_x) / 40),
-                                   40 * round(int(global_y + selected_y) / 40))]
-            print("naabrid:")
-            print(valitud.sides)
+            valitud_x = 40 * round(int(global_x + selected_x) / 40)
+            valitud_y = 40 * round(int(global_y + selected_y) / 40)
+            if (valitud_x, valitud_y) in blocks_dict:
+                blocks_dict[(valitud_x, valitud_y)].kill()
+                blocks_dict.pop((valitud_x, valitud_y))
     if keys[pygame.K_d]:
         global_x += speed * dt
     if keys[pygame.K_a]:
