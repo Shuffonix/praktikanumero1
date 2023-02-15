@@ -8,9 +8,9 @@ running = True
 global_x = 0
 global_y = 0
 speed = 100
-
-selected_x = 0
-selected_y = 0
+in_range = False
+local_x = 0
+local_y = 0
 selected_block = pygame.Surface(size=(42, 42))
 selected_block.fill((255, 0, 0))
 selected_block.set_colorkey((255, 0, 0))
@@ -24,36 +24,12 @@ for y in range(320, 2300, 40):
         blocks_dict[block.id] = block
         blocks.add(block)
 
+blocks.update(global_x, global_y, blocks_dict, True)
 while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
-    dt = kell.tick(60) / 1000
+    dt = kell.tick(144) / 1000
     keys = pygame.key.get_pressed()
-    left_click, middle_click, right_click = pygame.mouse.get_pressed()
 
-    selected_x = hiire_x // 40 * 40 - global_x % 40
-    selected_y = hiire_y // 40 * 40 - global_y % 40
-
-    if not 0 < hiire_y - selected_y < 40:
-        if hiire_y - selected_y > 40:
-            selected_y += 40
-        else:
-            selected_y -= 40
-
-    if not 0 < hiire_x - selected_x < 40:
-        if hiire_x - selected_x > 40:
-            selected_x += 40
-        else:
-            selected_x -= 40
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    if left_click:
-        valitud_x = 40 * round(int(global_x + selected_x) / 40)
-        valitud_y = 40 * round(int(global_y + selected_y) / 40)
-        if (valitud_x, valitud_y) in blocks_dict:
-            blocks_dict[(valitud_x, valitud_y)].kill()
-            blocks_dict.pop((valitud_x, valitud_y))
     if keys[pygame.K_d]:
         global_x += speed * dt
     if keys[pygame.K_a]:
@@ -62,6 +38,47 @@ while running:
         global_y += speed * dt
     if keys[pygame.K_w]:
         global_y -= speed * dt
+
+    left_click, middle_click, right_click = pygame.mouse.get_pressed()
+
+    local_x = hiire_x // 40 * 40 - global_x % 40
+    local_y = hiire_y // 40 * 40 - global_y % 40
+
+    if not 0 < hiire_y - local_y < 40:
+        if hiire_y - local_y > 40:
+            local_y += 40
+        else:
+            local_y -= 40
+
+    if not 0 < hiire_x - local_x < 40:
+        if hiire_x - local_x > 40:
+            local_x += 40
+        else:
+            local_x -= 40
+
+    selected_x = 40 * round(int(global_x + local_x) / 40)
+    selected_y = 40 * round(int(global_y + local_y) / 40)
+
+    if ((hiire_x - 320)**2 + (hiire_y - 240)**2)**0.5 <= 200:
+        in_range = True
+    else:
+        in_range = False
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    if left_click:
+        if (selected_x, selected_y) in blocks_dict and in_range:
+            blocks_dict[(selected_x, selected_y)].kill()
+            blocks_dict.pop((selected_x, selected_y))
+            blocks.update(global_x, global_y, blocks_dict, True)
+    elif right_click:
+        if (not (selected_x, selected_y) in blocks_dict) and in_range:
+            block = Block(selected_x, selected_y)
+            blocks.add(block)
+            blocks_dict[block.id] = block
+            blocks.update(global_x, global_y, blocks_dict, True)
 
     # background
     screen.fill((255, 255, 255))
@@ -73,7 +90,11 @@ while running:
 
     blocks.update(global_x, global_y, blocks_dict)
     blocks.draw(screen)
-    screen.blit(selected_block, (selected_x, selected_y))
 
+    # range check
+    if not in_range:
+        pygame.draw.circle(screen, (125, 125, 125), (320, 240), 200, 2)
+    elif (selected_x, selected_y) in blocks_dict:
+        screen.blit(selected_block, (local_x, local_y))
     pygame.display.flip()
 pygame.quit()

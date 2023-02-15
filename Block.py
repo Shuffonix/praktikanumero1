@@ -4,44 +4,53 @@ import pygame.sprite
 class Block(pygame.sprite.Sprite):
     def __init__(self, x, y, pilt=None):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((41, 41))
-        self.image.fill((150, 255, 150))
-        self.rect = self.image.get_rect()
+        self.origin = pygame.Surface((40, 40))
+        self.origin.fill((150, 255, 150))
+        self.image = self.origin.copy()
+        self.rect = self.origin.get_rect()
         self.x = x
         self.y = y
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = x + 1
+        self.rect.y = y + 1
         self.id = (x, y)
-        self.sides = [False, False, False, False]
+        self.sides = [True, True, True, True]
 
-    def update(self, global_x, global_y, block_dict):
-        self.rect.x = self.x - global_x
-        self.rect.y = self.y - global_y
+    def update(self, global_x, global_y, block_dict, check_neighbors=False):
+        self.image = self.origin.copy()
+        self.rect.x = self.x - global_x + 1
+        self.rect.y = self.y - global_y + 1
 
-        # ülemine naaber
-        if (self.x, self.y - 40) in block_dict:
-            self.sides[0] = True
-        else:
-            pygame.draw.line(self.image, (0, 0, 0), (0, 0), (40, 0), 5)
-            self.sides[0] = False
+        if check_neighbors:
+            # ülemine naaber
+            if (self.x, self.y - 40) in block_dict:
+                self.sides[0] = True
+            else:
+                self.sides[0] = False
 
-        # parem naaber
-        if (self.x + 40, self.y) in block_dict:
-            self.sides[1] = True
-        else:
-            pygame.draw.line(self.image, (0, 0, 0), (40, 0), (40, 40), 5)
-            self.sides[1] = False
+            # parem naaber
+            if (self.x + 40, self.y) in block_dict:
+                self.sides[1] = True
+            else:
+                self.sides[1] = False
 
-        # alumine naaber
-        if (self.x, self.y + 40) in block_dict:
-            self.sides[2] = True
-        else:
-            pygame.draw.line(self.image, (0, 0, 0), (40, 40), (0, 40), 5)
-            self.sides[2] = False
+            # alumine naaber
+            if (self.x, self.y + 40) in block_dict:
+                self.sides[2] = True
+            else:
 
-        # vasak naaber
-        if (self.x - 40, self.y) in block_dict:
-            self.sides[3] = True
-        else:
-            pygame.draw.line(self.image, (0, 0, 0), (0, 40), (0, 0), 5)
-            self.sides[3] = False
+                self.sides[2] = False
+
+            # vasak naaber
+            if (self.x - 40, self.y) in block_dict:
+                self.sides[3] = True
+            else:
+                self.sides[3] = False
+
+        if not self.sides[0]:
+            pygame.draw.line(self.image, (0, 0, 0), (0, 0), (39, 0), 5)
+        if not self.sides[1]:
+            pygame.draw.line(self.image, (0, 0, 0), (39, 0), (39, 40), 5)
+        if not self.sides[2]:
+            pygame.draw.line(self.image, (0, 0, 0), (39, 39), (0, 39), 5)
+        if not self.sides[3]:
+            pygame.draw.line(self.image, (0, 0, 0), (0, 39), (0, 0), 5)
