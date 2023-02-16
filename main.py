@@ -1,18 +1,23 @@
 import pygame
 from Block import Block
+from Player import Player
+pygame.init()
 
 
+running = True
 screen = pygame.display.set_mode((640, 480))
 kell = pygame.time.Clock()
-speed = 100
+speed = 150
 in_range = False
-running = True
+is_jumping = False
 global_x = 0  # x mis ei liigu mapi suhtes
 global_y = 0  # y mis ei liigu mapi suhtes
 local_x = 0  # 40ga ümardatud x ekraani suhtes
 local_y = 0  # 40ga ümardatud y ekraani suhtes
 selected_x = 0  # local_x aga mapi suhtes
 selected_y = 0  # local_y aga mapi suhtes
+vel_x = 0  # horisontaalkiirus
+vel_y = 0  # vertikaalkiirus
 
 # pmst (local_x, local_y) valikukasti jaoks,
 # global_x/y + local_x/y = selected_x/y,
@@ -29,6 +34,9 @@ selected_block.set_colorkey((255, 0, 0))
 pygame.draw.rect(selected_block, (0, 0, 0), (0, 0, 42, 42), 3)
 
 # genereerib mapi
+player = Player()
+player_group = pygame.sprite.Group()
+player_group.add(player)
 blocks_dict = {}
 blocks = pygame.sprite.Group()
 for y in range(320, 2300, 40):
@@ -36,27 +44,98 @@ for y in range(320, 2300, 40):
         block = Block(x, y)
         blocks_dict[block.id] = block
         blocks.add(block)
-
+visible_blocks = pygame.sprite.Group()
 # update(...) - uuendab blockide asukohti
 # update(..., True) - uuendab lisaks ka naabreid (kasulik, kui lisad või eemaldad blocke)
-blocks.update(global_x, global_y, blocks_dict, True)
+blocks.update(global_x, global_y, blocks_dict, visible_blocks, True)
+
+
+def detect_collision(vel_x, vel_y):
+    global global_x, global_y, is_jumping
+
+    up_points = [
+        (player.rect.left, player.rect.top + vel_y),
+        (player.rect.right, player.rect.top + vel_y)
+    ]
+    down_points = [
+        (player.rect.left, player.rect.bottom + vel_y),
+        (player.rect.right, player.rect.bottom + vel_y)
+    ]
+    left_points = [
+        (player.rect.left + vel_x, player.rect.top),
+        (player.rect.left + vel_x, player.rect.centery),
+        (player.rect.left + vel_x, player.rect.bottom)
+    ]
+    right_points = [
+        (player.rect.right + vel_x, player.rect.top),
+        (player.rect.right + vel_x, player.rect.centery),
+        (player.rect.right + vel_x, player.rect.bottom)
+    ]
+
+    for colliding_block in visible_blocks:
+        if vel_x > 0:
+            for point in right_points:
+                if colliding_block.rect.collidepoint(point):
+                    global_x += colliding_block.rect.left - point[0]
+                    break
+        elif vel_x < 0:
+            for point in left_points:
+                if colliding_block.rect.collidepoint(point):
+                    global_x += colliding_block.rect.right - point[0]
+        elif vel_y > 0:
+            for point in down_points:
+                if colliding_block.rect.collidepoint(point):
+                    global_y += colliding_block.rect.top - point[1]
+                    is_jumping = False
+                    print("jump stop")
+        elif vel_y < 0:
+            for point in up_points:
+                if colliding_block.rect.collidepoint(point):
+                    global_y += colliding_block.rect.bottom - point[1]
+        elif not is_jumping:
+            for point in down_points:
+                if not colliding_block.rect.collidepoint(point):
+                    is_jumping = True
+                    print("jump start")
 
 while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
     dt = kell.tick(144) / 1000
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_d]:  # liigu
-        global_x += speed * dt
-    if keys[pygame.K_a]:
-        global_x -= speed * dt
-    if keys[pygame.K_s]:
-        global_y += speed * dt
-    if keys[pygame.K_w]:
-        global_y -= speed * dt
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
+    # horisontaalne liikumine
+    if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) == (keys[pygame.K_a] or keys[pygame.K_LEFT]):
+        vel_x = 0
+    elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+        vel_x = -speed * dt
+    else:
+        vel_x = speed * dt
+
+    # vertikaalne liikumine
+    if not is_jumping:
+        vel_y = 0
+        if keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]:
+            vel_y = -1000 * dt
+            is_jumping = True
+
+    if vel_y != 0 and vel_x != 0:
+        vel_x *= abs(vel_x / (abs(vel_x) + abs(vel_y)))
+
+    # mängija liikumine ja samaaegne collision detection blockidega
+    detect_collision(vel_x, 0)
+    global_x += vel_x
+
+    detect_collision(0, vel_y)
+    if is_jumping:
+        vel_y += 20 * dt
+    global_y += vel_y
+
+    blocks.update(global_x, global_y, blocks_dict, visible_blocks)
     left_click, middle_click, right_click = pygame.mouse.get_pressed()
-
     local_x = hiire_x // 40 * 40 - global_x % 40
     local_y = hiire_y // 40 * 40 - global_y % 40
 
@@ -81,24 +160,23 @@ while running:
     else:
         in_range = False
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
     # lõhub blocke
+    # eeldused: block on olemas, on ulatuses
     if left_click:
         if (selected_x, selected_y) in blocks_dict and in_range:
             blocks_dict[(selected_x, selected_y)].kill()
             blocks_dict.pop((selected_x, selected_y))
-            blocks.update(global_x, global_y, blocks_dict, True)
+            blocks.update(global_x, global_y, blocks_dict, visible_blocks, True)
 
     # lisab blocke
+    # eeldused: on ulatuses, pole ees juba blocki, ei kattu mängijaga
     elif right_click:
-        if (not (selected_x, selected_y) in blocks_dict) and in_range:
+        if in_range and not (selected_x, selected_y) in blocks_dict and not player.rect.colliderect(
+                pygame.Rect(local_x, local_y, 40, 40)):
             block = Block(selected_x, selected_y)
             blocks.add(block)
             blocks_dict[block.id] = block
-            blocks.update(global_x, global_y, blocks_dict, True)
+            blocks.update(global_x, global_y, blocks_dict, visible_blocks, True)
 
     # background
     screen.fill((255, 255, 255))
@@ -108,8 +186,8 @@ while running:
         pygame.draw.line(screen, (225, 225, 225), (0, bg_y), (640, bg_y), 2)
     # siit alates saab lisada blocke jms
 
-    blocks.update(global_x, global_y, blocks_dict)
-    blocks.draw(screen)
+    visible_blocks.draw(screen)
+    player_group.draw(screen)
 
     # in range - valikukast
     # not in range - range circle
