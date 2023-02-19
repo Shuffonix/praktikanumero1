@@ -54,49 +54,61 @@ def detect_collision(vel_x, vel_y):
     global global_x, global_y, is_jumping
 
     up_points = [
-        (player.rect.left, player.rect.top + vel_y),
-        (player.rect.right, player.rect.top + vel_y)
+        (player.rect.left, player.rect.top + vel_y - 1),
+        (player.rect.right, player.rect.top + vel_y - 1)
     ]
     down_points = [
-        (player.rect.left, player.rect.bottom + vel_y),
-        (player.rect.right, player.rect.bottom + vel_y)
+        (player.rect.left, player.rect.bottom + vel_y + 1),
+        (player.rect.right, player.rect.bottom + vel_y + 1)
     ]
     left_points = [
-        (player.rect.left + vel_x, player.rect.top),
-        (player.rect.left + vel_x, player.rect.centery),
-        (player.rect.left + vel_x, player.rect.bottom)
+        (player.rect.left + vel_x - 1, player.rect.top),
+        (player.rect.left + vel_x - 1, player.rect.centery),
+        (player.rect.left + vel_x - 1, player.rect.bottom)
     ]
     right_points = [
-        (player.rect.right + vel_x, player.rect.top),
-        (player.rect.right + vel_x, player.rect.centery),
-        (player.rect.right + vel_x, player.rect.bottom)
+        (player.rect.right + vel_x + 1, player.rect.top),
+        (player.rect.right + vel_x + 1, player.rect.centery),
+        (player.rect.right + vel_x + 1, player.rect.bottom)
     ]
-
+    moved = False
     for colliding_block in visible_blocks:
+        if moved:
+            break
         if vel_x > 0:
             for point in right_points:
                 if colliding_block.rect.collidepoint(point):
                     global_x += colliding_block.rect.left - point[0]
+                    moved = True
                     break
         elif vel_x < 0:
             for point in left_points:
                 if colliding_block.rect.collidepoint(point):
                     global_x += colliding_block.rect.right - point[0]
+                    moved = True
+                    break
         elif vel_y > 0:
             for point in down_points:
                 if colliding_block.rect.collidepoint(point):
                     global_y += colliding_block.rect.top - point[1]
                     is_jumping = False
+                    moved = True
                     print("jump stop")
+                    break
         elif vel_y < 0:
             for point in up_points:
                 if colliding_block.rect.collidepoint(point):
                     global_y += colliding_block.rect.bottom - point[1]
+                    moved = True
+                    break
         elif not is_jumping:
             for point in down_points:
                 if not colliding_block.rect.collidepoint(point):
                     is_jumping = True
+                    moved = True
                     print("jump start")
+                    break
+
 
 while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
@@ -130,11 +142,13 @@ while running:
     global_x += vel_x
 
     detect_collision(0, vel_y)
-    if is_jumping:
-        vel_y += 20 * dt
+    """if is_jumping:
+        vel_y += 20 * dt"""
     global_y += vel_y
 
-    blocks.update(global_x, global_y, blocks_dict, visible_blocks)
+    if vel_x != 0 or vel_y != 0:
+        blocks.update(global_x, global_y, blocks_dict, visible_blocks)
+
     left_click, middle_click, right_click = pygame.mouse.get_pressed()
     local_x = hiire_x // 40 * 40 - global_x % 40
     local_y = hiire_y // 40 * 40 - global_y % 40
