@@ -127,12 +127,12 @@ while running:
         vel_x = speed * dt
 
     # vertikaalne liikumine
-    jump_cd -= dt
+    jump_cd -= 2 * dt
     if not is_jumping:
         vel_y = 0
-        if jump_cd <= 0 and (keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]):
-            vel_y = -600 * dt
-            print(vel_y)
+        if (keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]):
+            vana = vel_y
+            vel_y = -1000 * dt
             jump_cd = 1
 
     # mängija liikumine ja samaaegne collision detection blockidega
