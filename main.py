@@ -117,6 +117,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            break
 
     # horisontaalne liikumine
     if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) == (keys[pygame.K_a] or keys[pygame.K_LEFT]):
@@ -127,10 +128,10 @@ while running:
         vel_x = speed * dt
 
     # vertikaalne liikumine
-    jump_cd -= 2 * dt
+    jump_cd -= dt
     if not is_jumping:
         vel_y = 0
-        if (keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]):
+        if jump_cd <= 0 and (keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]):
             vana = vel_y
             vel_y = -1000 * dt
             jump_cd = 1
