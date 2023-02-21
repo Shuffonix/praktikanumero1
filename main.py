@@ -10,6 +10,7 @@ kell = pygame.time.Clock()
 speed = 150
 in_range = False
 is_jumping = False
+jump_cd = 0
 global_x = 0  # x mis ei liigu mapi suhtes
 global_y = 0  # y mis ei liigu mapi suhtes
 local_x = 0  # 40ga ümardatud x ekraani suhtes
@@ -80,7 +81,7 @@ def detect_collision(vel_x, vel_y):
         if vel_x > 0:
             for point in right_points:
                 if colliding_block.rect.collidepoint(point):
-                    global_x += colliding_block.rect.left - point[0]
+                    global_x += colliding_block.rect.left - point[0] - 1
                     moved = True
                     break
         elif vel_x < 0:
@@ -101,11 +102,7 @@ def detect_collision(vel_x, vel_y):
                     global_y += colliding_block.rect.bottom - point[1]
                     moved = True
                     break
-        elif not is_jumping:
-            for point in down_points:
-                if not colliding_block.rect.collidepoint(point):
-                    moved = True
-                    break
+
     if any(colliding.rect.collidepoint(point) for point in down_points for colliding in visible_blocks):
         is_jumping = False
     else:
@@ -130,10 +127,13 @@ while running:
         vel_x = speed * dt
 
     # vertikaalne liikumine
+    jump_cd -= dt
     if not is_jumping:
         vel_y = 0
-        if keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]:
-            vel_y = -1000 * dt
+        if jump_cd <= 0 and (keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]):
+            vel_y = -600 * dt
+            print(vel_y)
+            jump_cd = 1
 
     # mängija liikumine ja samaaegne collision detection blockidega
     detect_collision(vel_x, 0)
@@ -171,7 +171,7 @@ while running:
         in_range = True
     else:
         in_range = False
-    print(vel_y)
+
     # lõhub blocke
     # eeldused: block on olemas, on ulatuses
     if left_click:
