@@ -52,7 +52,8 @@ blocks.update(global_x, global_y, blocks_dict, visible_blocks, True)
 
 def detect_collision(vel_x, vel_y):
     global global_x, global_y, is_jumping
-
+    vel_x = int(vel_x)
+    vel_y = int(vel_y)
     up_points = [
         (player.rect.left, player.rect.top + vel_y - 1),
         (player.rect.right, player.rect.top + vel_y - 1)
@@ -71,6 +72,7 @@ def detect_collision(vel_x, vel_y):
         (player.rect.right + vel_x + 1, player.rect.centery),
         (player.rect.right + vel_x + 1, player.rect.bottom)
     ]
+
     moved = False
     for colliding_block in visible_blocks:
         if moved:
@@ -90,10 +92,8 @@ def detect_collision(vel_x, vel_y):
         elif vel_y > 0:
             for point in down_points:
                 if colliding_block.rect.collidepoint(point):
-                    global_y += colliding_block.rect.top - point[1]
-                    is_jumping = False
+                    global_y += colliding_block.rect.top - point[1] - 1
                     moved = True
-                    print("jump stop")
                     break
         elif vel_y < 0:
             for point in up_points:
@@ -104,10 +104,12 @@ def detect_collision(vel_x, vel_y):
         elif not is_jumping:
             for point in down_points:
                 if not colliding_block.rect.collidepoint(point):
-                    is_jumping = True
                     moved = True
-                    print("jump start")
                     break
+    if any(colliding.rect.collidepoint(point) for point in down_points for colliding in visible_blocks):
+        is_jumping = False
+    else:
+        is_jumping = True
 
 
 while running:
@@ -132,18 +134,14 @@ while running:
         vel_y = 0
         if keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]:
             vel_y = -1000 * dt
-            is_jumping = True
-
-    if vel_y != 0 and vel_x != 0:
-        vel_x *= abs(vel_x / (abs(vel_x) + abs(vel_y)))
 
     # mängija liikumine ja samaaegne collision detection blockidega
     detect_collision(vel_x, 0)
     global_x += vel_x
 
     detect_collision(0, vel_y)
-    """if is_jumping:
-        vel_y += 20 * dt"""
+    if is_jumping:
+        vel_y += 20 * dt
     global_y += vel_y
 
     if vel_x != 0 or vel_y != 0:
@@ -173,7 +171,7 @@ while running:
         in_range = True
     else:
         in_range = False
-
+    print(vel_y)
     # lõhub blocke
     # eeldused: block on olemas, on ulatuses
     if left_click:
@@ -186,7 +184,7 @@ while running:
     # eeldused: on ulatuses, pole ees juba blocki, ei kattu mängijaga
     elif right_click:
         if in_range and not (selected_x, selected_y) in blocks_dict and not player.rect.colliderect(
-                pygame.Rect(local_x, local_y, 40, 40)):
+                pygame.Rect(int(local_x), int(local_y), 40, 40)):
             block = Block(selected_x, selected_y)
             blocks.add(block)
             blocks_dict[block.id] = block
@@ -208,6 +206,6 @@ while running:
     if not in_range:
         pygame.draw.circle(screen, (125, 125, 125), (320, 240), 200, 2)
     elif (selected_x, selected_y) in blocks_dict:
-        screen.blit(selected_block, (local_x, local_y))
+        screen.blit(selected_block, (int(local_x), int(local_y)))
     pygame.display.flip()
 pygame.quit()
