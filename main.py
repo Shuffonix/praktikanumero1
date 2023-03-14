@@ -134,6 +134,7 @@ while running:
         if jump_cd <= 0 and (keys[pygame.K_w] or keys[pygame.K_SPACE] or keys[pygame.K_UP]):
             vana = vel_y
             vel_y = -1000 * dt
+            print(vana - vel_y)
             jump_cd = 1
 
     # mängija liikumine ja samaaegne collision detection blockidega
@@ -143,6 +144,7 @@ while running:
     detect_collision(0, vel_y)
     if is_jumping:
         vel_y += 20 * dt
+        vel_y = min(vel_y, 100)
     global_y += vel_y
 
     if vel_x != 0 or vel_y != 0:
