@@ -3,4 +3,4 @@ from random import randint
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __
+    def
