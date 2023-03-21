@@ -1,2 +1,2 @@
 # praktikanumero1
-see on esimene versioon
+see on teine versioon
