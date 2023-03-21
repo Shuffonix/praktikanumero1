@@ -3,7 +3,7 @@ from Block import Block
 from Player import Player
 pygame.init()
 
-
+font = pygame.font.SysFont("Times New Roman", 32)
 running = True
 screen = pygame.display.set_mode((640, 480))
 kell = pygame.time.Clock()
@@ -51,52 +51,52 @@ visible_blocks = pygame.sprite.Group()
 blocks.update(global_x, global_y, blocks_dict, visible_blocks, True)
 
 
-def detect_collision(vel_x, vel_y):
+def detect_collision(velo_x, velo_y):
     global global_x, global_y, is_jumping
-    vel_x = int(vel_x)
-    vel_y = int(vel_y)
+    velo_x = int(velo_x)
+    velo_y = int(velo_y)
     up_points = [
-        (player.rect.left, player.rect.top + vel_y - 1),
-        (player.rect.right, player.rect.top + vel_y - 1)
+        (player.rect.left, player.rect.top + velo_y - 1),
+        (player.rect.right, player.rect.top + velo_y - 1)
     ]
     down_points = [
-        (player.rect.left, player.rect.bottom + vel_y + 1),
-        (player.rect.right, player.rect.bottom + vel_y + 1)
+        (player.rect.left, player.rect.bottom + velo_y + 1),
+        (player.rect.right, player.rect.bottom + velo_y + 1)
     ]
     left_points = [
-        (player.rect.left + vel_x - 1, player.rect.top),
-        (player.rect.left + vel_x - 1, player.rect.centery),
-        (player.rect.left + vel_x - 1, player.rect.bottom)
+        (player.rect.left + velo_x - 1, player.rect.top),
+        (player.rect.left + velo_x - 1, player.rect.centery),
+        (player.rect.left + velo_x - 1, player.rect.bottom)
     ]
     right_points = [
-        (player.rect.right + vel_x + 1, player.rect.top),
-        (player.rect.right + vel_x + 1, player.rect.centery),
-        (player.rect.right + vel_x + 1, player.rect.bottom)
+        (player.rect.right + velo_x + 1, player.rect.top),
+        (player.rect.right + velo_x + 1, player.rect.centery),
+        (player.rect.right + velo_x + 1, player.rect.bottom)
     ]
 
     moved = False
     for colliding_block in visible_blocks:
         if moved:
             break
-        if vel_x > 0:
+        if velo_x > 0:
             for point in right_points:
                 if colliding_block.rect.collidepoint(point):
                     global_x += colliding_block.rect.left - point[0] - 1
                     moved = True
                     break
-        elif vel_x < 0:
+        elif velo_x < 0:
             for point in left_points:
                 if colliding_block.rect.collidepoint(point):
                     global_x += colliding_block.rect.right - point[0]
                     moved = True
                     break
-        elif vel_y > 0:
+        elif velo_y > 0:
             for point in down_points:
                 if colliding_block.rect.collidepoint(point):
                     global_y += colliding_block.rect.top - point[1] - 1
                     moved = True
                     break
-        elif vel_y < 0:
+        elif velo_y < 0:
             for point in up_points:
                 if colliding_block.rect.collidepoint(point):
                     global_y += colliding_block.rect.bottom - point[1]
@@ -111,9 +111,8 @@ def detect_collision(vel_x, vel_y):
 
 while running:
     hiire_x, hiire_y = pygame.mouse.get_pos()
-    dt = kell.tick(144) / 1000
+    dt = kell.tick(60) / 1000
     keys = pygame.key.get_pressed()
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -144,7 +143,7 @@ while running:
     detect_collision(0, vel_y)
     if is_jumping:
         vel_y += 20 * dt
-        vel_y = min(vel_y, 100)
+        vel_y = min(vel_y, 50)
     global_y += vel_y
 
     if vel_x != 0 or vel_y != 0:
@@ -154,6 +153,7 @@ while running:
     local_x = hiire_x // 40 * 40 - global_x % 40
     local_y = hiire_y // 40 * 40 - global_y % 40
 
+    # aim correction
     if not 0 < hiire_y - local_y < 40:
         if hiire_y - local_y > 40:
             local_y += 40
@@ -170,7 +170,7 @@ while running:
     selected_y = 40 * round(int(global_y + local_y) / 40)
 
     # raadius ekraani keskelt hiireni <= 200
-    if ((hiire_x - 320)**2 + (hiire_y - 240)**2)**0.5 <= 200:
+    if ((hiire_x - 320)**2 + (hiire_y - 240)**2)**0.5 <= 225:
         in_range = True
     else:
         in_range = False
@@ -207,8 +207,10 @@ while running:
     # in range - valikukast
     # not in range - range circle
     if not in_range:
-        pygame.draw.circle(screen, (125, 125, 125), (320, 240), 200, 2)
+        pygame.draw.circle(screen, (125, 125, 125), (320, 240), 225, 2)
     elif (selected_x, selected_y) in blocks_dict:
         screen.blit(selected_block, (int(local_x), int(local_y)))
+    text = font.render(str(kell.get_fps()), True, (0, 0, 0))
+    screen.blit(text, (0, 0))
     pygame.display.flip()
 pygame.quit()
