@@ -2,7 +2,7 @@ import pygame
 from gun import Gun
 from bullet import Bullet
 from border import Border
-from math import atan2, degrees, cos, sin, radians
+from math import atan2, degrees, cos, sin, radians, pi
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -12,20 +12,31 @@ clock = pygame.time.Clock()
 gun = Gun(320, 240)
 gun_group = pygame.sprite.Group()
 gun_group.add(gun)
-# hoiustan siin bulletid, ja lisan need loopi sees groupi
+
+# hoiustan siin aktiivseid kuule
 bullets = []
+# hoiustan particleid mis tekivad kui kuul liiga palju bouncib
+particles = []
+# mängu borderid
+borders = []
 
-
-def check_collision_with_sides():
+def check_border_collision():
+    global particles
     # pmst mul on 4 külge ja ma kontrollin iga bulletiga kas ta on collisionis mõne küljega
     for bullet in bullets:
         obj = bullet.rect
         for x in borders:
             if obj.clipline(x.start, x.end):
-                bullets.remove(bullet)
-                print('hit!')
+                # kui bullet on collisionis, siis muuda kiirust vastandarvuks, sellega saab vastupidise liikumise suuna
+                if bullet.bounces > 3:
+                    particles = bullet.explode()
+                    bullets.remove(bullet)
+                bullet.velocity *= -1
+                bullet.bounces += 1
+                # lisan 90 deg, sest nii peaks vist saama peegeldusnurga???
+                bullet.rad += pi/2
+                bullet.update_angle()
                 break
-    # kui bullet on collisionis, siis muuda kiirust vastandarvuks
 
 
 def get_angle(x2, y2, x1, y1):
@@ -35,7 +46,6 @@ def get_angle(x2, y2, x1, y1):
     return rads
 
 
-borders = []
 def draw_borders():
     border1 = Border(10, 10, screen.get_width() - 20, True)  # top
     border2 = Border(10, 10, screen.get_height() - 20, False)  # left
@@ -49,7 +59,6 @@ def draw_borders():
         b.draw(screen)
 
 
-
 while running:
     screen.fill((255, 255, 255))
     keys = pygame.key.get_pressed()
@@ -57,11 +66,11 @@ while running:
     mouse_x, mouse_y = pygame.mouse.get_pos()
     dt = clock.tick() / 1000
 
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+        # selle teeb veel paremaks, see hetkel ainult nii lol
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
@@ -77,10 +86,21 @@ while running:
     # bulletide uuendamine
     for bullet in bullets:
         bullet.update(dt)
-    check_collision_with_sides()
-    # borders.draw(screen)
+    check_border_collision()
+
+    # particles renderdamine
+    for i in range(8):
+        if len(particles) == 0:  # säästame CPU-d
+            break
+        for p in particles:
+            p.move()
+            pygame.draw.circle(screen, (255, 0, 0), (p.x, p.y), 8-i)
+    if len(particles) > 0:
+        particles.pop(0)
+
+    # bulletide ekraanile joonistamine
     for bullet in bullets:
         bullet.draw(screen)
 
-    pygame.display.flip()
+    pygame.display.update()
 pygame.quit()
