@@ -11,13 +11,13 @@ class Bullet():
         self.dy = -sin(rad) * self.velocity  # fuck põdra ja fuck matemaatika bruh
         self.x = x
         self.y = y
-        self.image = pygame.Rect((self.x, self.y, 10, 10))
+        self.rect = pygame.Rect((self.x, self.y, 10, 10))
         self.rad = rad
 
     def update(self, dt):
         self.x = self.x + self.dx * dt
         self.y = self.y + self.dy * dt
-        self.image = pygame.Rect((self.x, self.y, 10, 10))
+        self.rect = pygame.Rect((self.x, self.y, 10, 10))
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (255, 0, 0), self.image)
+        pygame.draw.rect(screen, (255, 0, 0), self.rect)
