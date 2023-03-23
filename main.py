@@ -49,14 +49,13 @@ def get_angle(x2, y2, x1, y1):
 def draw_borders():
     border1 = Border(10, 10, screen.get_width() - 20, True)  # top
     border2 = Border(10, 10, screen.get_height() - 20, False)  # left
-    border3 = Border(640 - 10, 0 + 10, screen.get_height() - 20, False)  # right
-    border4 = Border(0 + 10, 480 - 10, screen.get_width() - 20, True)  # bottom
+    border3 = Border(screen.get_width() - 10, 0 + 10, screen.get_height() - 20, False)  # right
+    border4 = Border(0 + 10, screen.get_height() - 10, screen.get_width() - 20, True)  # bottom
     borders.append(border1)
     borders.append(border2)
     borders.append(border3)
     borders.append(border4)
-    for b in borders:
-        b.draw(screen)
+draw_borders()
 
 
 while running:
@@ -64,7 +63,7 @@ while running:
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    dt = clock.tick() / 1000
+    dt = clock.tick(60) / 1000
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -82,19 +81,25 @@ while running:
     gun_group.update(mouse_x, mouse_y, degrees(degs))
     gun_group.draw(screen)
 
-    draw_borders()
+    # joonistan borderid ekraanile siin
+    for b in borders:
+        b.draw(screen)
+
     # bulletide uuendamine
     for bullet in bullets:
         bullet.update(dt)
+
     check_border_collision()
 
     # particles renderdamine
     for i in range(8):
         if len(particles) == 0:  # säästame CPU-d
             break
+
         for p in particles:
             p.move()
             pygame.draw.circle(screen, (255, 0, 0), (p.x, p.y), 8-i)
+
     if len(particles) > 0:
         particles.pop(0)
 
