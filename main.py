@@ -2,7 +2,7 @@ import pygame
 from gun import Gun
 from bullet import Bullet
 from border import Border
-from math import atan2, degrees, pi
+from math import atan2, degrees
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -36,7 +36,7 @@ for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
 while running:
-    screen.fill((255, 255, 255))
+    screen.fill((0, 0, 0))
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -55,7 +55,7 @@ while running:
                 bullets.add(new_bullet)
 
     gun_group.update(mouse_x, mouse_y, degrees(rads))
-    bullets.update(dt)
+    bullets.update(dt, borders)
 
     # ekraanile joonistamine
     bullets.draw(screen)
