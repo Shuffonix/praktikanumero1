@@ -1,5 +1,6 @@
 import pygame
 
+
 class Border(pygame.sprite.Sprite):
 
     def __init__(self, x, y, length, angle):

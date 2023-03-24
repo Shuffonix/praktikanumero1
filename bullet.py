@@ -8,28 +8,6 @@ class Bullet(pygame.sprite.Sprite):
         self.bounces = 0
         self.velocity = 1000
         self.rad = rad
-<<<<<<< HEAD
-        self.dx = cos(self.rad) * self.velocity
-        self.dy = -sin(self.rad) * self.velocity  # fuck põdra ja fuck matemaatika bruh
-        self.image = pygame.Surface((10, 10))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-
-    # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
-
-
-    def update_angle(self):
-        self.dx = cos(self.rad) * self.velocity
-        self.dy = -sin(self.rad) * self.velocity
-
-    def update(self, dt):
-        self.rect.x += self.dx * dt
-        self.rect.y += self.dy * dt
-
-        #self.rect = pygame.Rect((self.x, self.y, 10, 10))
-=======
         self.dx = cos(self.rad)
         self.dy = -sin(self.rad)  # fuck põdra ja fuck matemaatika bruh
         self.origin = pygame.Surface((20, 10), pygame.SRCALPHA)
@@ -52,7 +30,6 @@ class Bullet(pygame.sprite.Sprite):
                     self.dx *= -1
                 else:
                     self.dy *= -1
->>>>>>> trevori-branch
 
                 self.rad = atan2(self.dy, -self.dx)
                 self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
