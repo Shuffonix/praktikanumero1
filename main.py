@@ -89,7 +89,7 @@ while running:
     for bullet in bullets:
         bullet.update(dt)
 
-    check_border_collision()
+    #check_border_collision()
 
     # particles renderdamine
     for i in range(8):

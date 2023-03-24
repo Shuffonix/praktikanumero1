@@ -13,19 +13,24 @@ class Bullet():
         self.rad = rad
         self.dx = cos(self.rad) * self.velocity
         self.dy = -sin(self.rad) * self.velocity  # fuck põdra ja fuck matemaatika bruh
-        self.x = x
-        self.y = y
-        self.rect = pygame.Rect((self.x, self.y, 10, 10))
+        self.image = pygame.Surface((10, 10))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
+
+
     def update_angle(self):
-        self.dx = cos(self.rad) * self.velocity + 10
-        self.dy = -sin(self.rad) * self.velocity + 10
+        self.dx = cos(self.rad) * self.velocity
+        self.dy = -sin(self.rad) * self.velocity
 
     def update(self, dt):
-        self.x = self.x + self.dx * dt
-        self.y = self.y + self.dy * dt
-        self.rect = pygame.Rect((self.x, self.y, 10, 10))
+        self.rect.x += self.dx * dt
+        self.rect.y += self.dy * dt
+
+        #self.rect = pygame.Rect((self.x, self.y, 10, 10))
 
     # pmst tagastab mitu particle-it see kuul omab
     def explode(self):
