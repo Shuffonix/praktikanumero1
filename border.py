@@ -1,20 +1,14 @@
 import pygame
 
-
 class Border(pygame.sprite.Sprite):
 
-    def __init__(self, x, y, length, horizontal):
+    def __init__(self, x, y, length, angle):
         pygame.sprite.Sprite.__init__(self)
-        self.start = (x, y)
-        if horizontal:
-            self.end = (x+length, y)
-        else:
-            self.end = (x, y+length)
-
-        """if horizontal:
-            self.object = pygame.Rect(x, y, length, 1)
-        else:
-            self.object = pygame.Rect(x, y, 1, length)"""
-
-    def draw(self, screen):
-        pygame.draw.line(screen, (0, 0, 0), self.start, self.end, 5)
+        self.angle = angle
+        self.image = pygame.Surface((length, 10), pygame.SRCALPHA)
+        self.image.fill((255, 255, 255))
+        self.image = pygame.transform.rotozoom(self.image, angle, 1)
+        self.rect = self.image.get_bounding_rect()
+        self.rect.y = y
+        self.rect.x = x
+        self.mask = pygame.mask.from_surface(self.image)

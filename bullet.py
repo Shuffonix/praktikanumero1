@@ -1,16 +1,14 @@
-import random
 import pygame
-from random import randint
-from math import atan2, degrees, cos, sin, radians
-from particle import Particle
+from math import degrees, cos, sin, atan2
 
 
-# sry ma ei saa sellest Group asjast ikka veel aru, seega ma ei kasuta toda lol
-class Bullet():
-    def __init__(self, x, y, rad):
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, rad):
+        pygame.sprite.Sprite.__init__(self)
         self.bounces = 0
-        self.velocity = 100
+        self.velocity = 1000
         self.rad = rad
+<<<<<<< HEAD
         self.dx = cos(self.rad) * self.velocity
         self.dy = -sin(self.rad) * self.velocity  # fuck põdra ja fuck matemaatika bruh
         self.image = pygame.Surface((10, 10))
@@ -31,12 +29,43 @@ class Bullet():
         self.rect.y += self.dy * dt
 
         #self.rect = pygame.Rect((self.x, self.y, 10, 10))
+=======
+        self.dx = cos(self.rad)
+        self.dy = -sin(self.rad)  # fuck põdra ja fuck matemaatika bruh
+        self.origin = pygame.Surface((20, 10), pygame.SRCALPHA)
+        self.origin.fill((255, 100, 0))
+        self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
+        self.rect = self.image.get_rect()
+        self.x = 320
+        self.y = 240
+        self.mask = pygame.mask.from_surface(self.image)
+        self.collisions = 0
 
-    # pmst tagastab mitu particle-it see kuul omab
-    def explode(self):
-        number = randint(8, 24)
-        particles = [Particle(self.x, self.y) for i in range(number)]
-        return particles
+    # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
+    def collision(self, borders):
+        collisions = 0
+        for border in borders:
+            if pygame.sprite.collide_mask(self, border):
+                collisions = 1
 
-    def draw(self, screen):
-        pygame.draw.rect(screen, (255, 0, 0), self.rect)
+                if border.angle == 90:
+                    self.dx *= -1
+                else:
+                    self.dy *= -1
+>>>>>>> trevori-branch
+
+                self.rad = atan2(self.dy, -self.dx)
+                self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
+                self.mask = pygame.mask.from_surface(self.image)
+        self.collisions += collisions
+
+    def update(self, dt, borders):
+        self.x += self.dx * dt * self.velocity
+        self.y += self.dy * dt * self.velocity
+
+        self.rect.centerx = int(self.x)
+        self.rect.centery = int(self.y)
+
+        self.collision(borders)
+        if self.collisions > 3:
+            self.kill()

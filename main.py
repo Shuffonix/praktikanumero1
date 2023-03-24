@@ -2,7 +2,7 @@ import pygame
 from gun import Gun
 from bullet import Bullet
 from border import Border
-from math import atan2, degrees, cos, sin, radians, pi
+from math import atan2, degrees
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -14,38 +14,21 @@ gun_group = pygame.sprite.Group()
 gun_group.add(gun)
 
 # hoiustan siin aktiivseid kuule
-bullets = []
+bullets = pygame.sprite.Group()
 # hoiustan particleid mis tekivad kui kuul liiga palju bouncib
 particles = []
 # mängu borderid
-borders = []
-
-def check_border_collision():
-    global particles
-    # pmst mul on 4 külge ja ma kontrollin iga bulletiga kas ta on collisionis mõne küljega
-    for bullet in bullets:
-        obj = bullet.rect
-        for x in borders:
-            if obj.clipline(x.start, x.end):
-                # kui bullet on collisionis, siis muuda kiirust vastandarvuks, sellega saab vastupidise liikumise suuna
-                if bullet.bounces > 3:
-                    particles = bullet.explode()
-                    bullets.remove(bullet)
-                bullet.velocity *= -1
-                bullet.bounces += 1
-                # lisan 90 deg, sest nii peaks vist saama peegeldusnurga???
-                bullet.rad += pi/2
-                bullet.update_angle()
-                break
+borders = pygame.sprite.Group()
 
 
 def get_angle(x2, y2, x1, y1):
     dx = x1 - x2
     dy = y1 - y2
-    rads = atan2(-dy, dx)
-    return rads
+    rad = atan2(-dy, dx)
+    return rad
 
 
+<<<<<<< HEAD
 def draw_borders():
     border1 = Border(10, 10, screen.get_width() - 20, True)  # top
     border2 = Border(10, 10, screen.get_height() - 20, False)  # left
@@ -57,13 +40,26 @@ def draw_borders():
     borders.append(border4)
 draw_borders()
 
+=======
+top_border = Border(10, 10, 620, 0)
+left_border = Border(10, 10, 460, 90)
+right_border = Border(620, 10, 460, 90)
+bottom_border = Border(10, 460, 620, 0)
+for border in [top_border, left_border, right_border, bottom_border]:
+    borders.add(border)
+>>>>>>> trevori-branch
 
 while running:
-    screen.fill((255, 255, 255))
+    screen.fill((0, 0, 0))
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()
     mouse_x, mouse_y = pygame.mouse.get_pos()
+<<<<<<< HEAD
     dt = clock.tick(60) / 1000
+=======
+    dt = clock.tick(144) / 1000
+    rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
+>>>>>>> trevori-branch
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -73,13 +69,16 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
-                degs = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
-                new_bullet = Bullet(320, 240, degs)
-                bullets.append(new_bullet)
+                new_bullet = Bullet(rads)
+                bullets.add(new_bullet)
 
-    degs = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
-    gun_group.update(mouse_x, mouse_y, degrees(degs))
+    gun_group.update(mouse_x, mouse_y, degrees(rads))
+    bullets.update(dt, borders)
+
+    # ekraanile joonistamine
+    bullets.draw(screen)
     gun_group.draw(screen)
+<<<<<<< HEAD
 
     # joonistan borderid ekraanile siin
     for b in borders:
@@ -106,6 +105,9 @@ while running:
     # bulletide ekraanile joonistamine
     for bullet in bullets:
         bullet.draw(screen)
+=======
+    borders.draw(screen)
+>>>>>>> trevori-branch
 
     pygame.display.update()
 pygame.quit()
