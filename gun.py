@@ -13,6 +13,5 @@ class Gun(pygame.sprite.Sprite):
         self.rect.centery = y
 
     def update(self, x, y, degs):
-        self.image = self.origin.copy()
-        self.image = pygame.transform.rotozoom(self.image, degs, 1)
+        self.image = pygame.transform.rotozoom(self.origin.copy(), degs, 1)
         self.rect = self.image.get_rect(center=self.center)

@@ -20,30 +20,12 @@ particles = []
 # mängu borderid
 borders = pygame.sprite.Group()
 
-"""def check_border_collision():
-    global particles
-    # pmst mul on 4 külge ja ma kontrollin iga bulletiga kas ta on collisionis mõne küljega
-    for bullet in bullets:
-        obj = bullet.rect
-        for x in borders:
-            if obj.clipline(x.start, x.end):
-                # kui bullet on collisionis, siis muuda kiirust vastandarvuks, sellega saab vastupidise liikumise suuna
-                if bullet.bounces > 3:
-                    particles = bullet.explode()
-                    bullet.kill()
-                bullet.velocity *= -1
-                bullet.bounces += 1
-                # lisan 90 deg, sest nii peaks vist saama peegeldusnurga???
-                bullet.rad += pi/2
-                bullet.update_angle()
-                break
-"""
 
 def get_angle(x2, y2, x1, y1):
     dx = x1 - x2
     dy = y1 - y2
-    rads = atan2(-dy, dx)
-    return rads
+    rad = atan2(-dy, dx)
+    return rad
 
 
 top_border = Border(10, 10, 620, 0)
