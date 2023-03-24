@@ -40,7 +40,7 @@ while running:
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    dt = clock.tick() / 1000
+    dt = clock.tick(144) / 1000
     rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
 
     for event in pygame.event.get():
@@ -57,20 +57,10 @@ while running:
     gun_group.update(mouse_x, mouse_y, degrees(rads))
     bullets.update(dt)
 
-    # particles renderdamine
-    for i in range(8):
-        if len(particles) == 0:  # säästame CPU-d
-            break
-        for p in particles:
-            p.move()
-            pygame.draw.circle(screen, (255, 0, 0), (p.x, p.y), 8-i)
-    if len(particles) > 0:
-        particles.pop(0)
-
     # ekraanile joonistamine
+    bullets.draw(screen)
     gun_group.draw(screen)
     borders.draw(screen)
-    bullets.draw(screen)
 
     pygame.display.update()
 pygame.quit()

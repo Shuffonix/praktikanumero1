@@ -4,7 +4,7 @@ import pygame
 class Gun(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50, 10), pygame.SRCALPHA)
+        self.image = pygame.Surface((50, 15), pygame.SRCALPHA)
         self.image.fill((0, 0, 0))
         self.origin = self.image.copy()
         self.rect = self.image.get_bounding_rect()
