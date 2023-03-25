@@ -22,7 +22,6 @@ particles = []
 # mängu borderid
 borders = pygame.sprite.Group()
 # mingid teised obstacles
-map_of_obstacles = []
 obstacles = pygame.sprite.Group()
 
 
@@ -40,30 +39,44 @@ bottom_border = Border(10, 460, 620, 0)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
+# huiasin sellega mingi 2h, ei saanud head tulemit random genereerimisega, võid vaadata üle kui tahad
+map_selection = [[[50, 250], [400, 200], [300, 350]],
+                 [[300, 350], [450, 50], [400, 150], [500, 50], [150, 150]],
+                 [[250, 50], [450, 350], [150, 150]],
+                 [[400, 200], [50, 300], [50, 50], [500, 350]],
+                 [[100, 200], [350, 150], [50, 350]],
+                 [[500, 300], [350, 250], [450, 100], [200, 50], [200, 350]],
+                 [[100, 100], [400, 50], [500, 50], [50, 300], [400, 50], [350, 150], [350, 150]]
+                 ]
 
-new_obstacle = Obstacle(random.randint(90, screen.get_height() - 90), random.randint(50, screen.get_width() - 50))
-map_of_obstacles.append([new_obstacle.width, new_obstacle.rect.x, new_obstacle.rect.y])
-obstacles.add(new_obstacle)
-player_box = (420, 240+190)
+# genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
+nr = random.randint(0, len(map_selection)-1)
+for l in [[50, 250], [400, 200], [300, 350]]:
+    new_obj = Obstacle(l[0], l[1])
+    obstacles.add(new_obj)
 
-# genereerib need plokkid maailma
-while len(map_of_obstacles) < 3:
+
+# katkine idee
+"""while len(map_of_obstacles) < 2:
 
     x_cord = random.randint(90, screen.get_height() - 50)
     y_cord = random.randint(50, screen.get_width() - 90)
-
+    # new_obstacle = Obstacle(x_cord, y_cord)
+    print(x_cord, y_cord)
     for obj in map_of_obstacles:
+        print(map_of_obstacles)
+        if (obj[1]+50+ 10) < x_cord and (obj[1] - 10) > x_cord:
 
-        if (obj[1]+50+ 10) > x_cord and (obj[1]+50 - 10) < x_cord:
-            if (obj[0]+90 + 10) > y_cord and (obj[0]+90 - 10) < y_cord:
+            if (obj[1] + 10) > y_cord or (obj[1]+90 - 10) < y_cord:
                 if x_cord not in player_box and y_cord not in player_box:
                     new_obstacle = Obstacle(x_cord, y_cord)
 
                     map_of_obstacles.append([new_obstacle.rect.x, new_obstacle.rect.y])
-                    obstacles.add(new_obstacle)
+                    obstacles.add(new_obstacle)"""
 
 
 while running:
+    #print(obstacles)
     screen.fill((0, 0, 0))
     keys = pygame.key.get_pressed()
     mouse = pygame.mouse.get_pressed()

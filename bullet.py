@@ -21,34 +21,41 @@ class Bullet(pygame.sprite.Sprite):
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
     def collision(self, borders, obstacles):
-        collisions = 0
+        print(self.collisions)
+
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
-                collisions = 1
+
 
                 if border.angle == 90:
                     self.dx *= -1
                 else:
                     self.dy *= -1
-
+                self.velocity /= 1.4
+                self.collisions += 1
                 self.rad = atan2(self.dy, -self.dx)
                 self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
+
         # collision lisaplokkidega, vahepeal täitsa imelik
+
         for obstacle in obstacles:
             if pygame.sprite.collide_mask(self, obstacle):
-                collision = 1
-                print(pygame.sprite.collide_mask(self, obstacle))
+
                 comp = pygame.sprite.collide_mask(self, obstacle)
+                print(comp)
                 if comp[0] != 0 and comp[1] > 0 or comp[0] == 0 and comp[1] > 0:
                     self.dx *= -1
+
                 else:
                     self.dy *= -1
-                self.rad = atan2(self.dy, -self.dx)
+                self.velocity /= 2
+                self.collisions += 1
+                self.rad = atan2(-self.dy, self.dx)
                 self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
 
-        self.collisions += collisions
+        # self.collisions += collisions
 
     def update(self, dt, borders, obstacles):
         self.x += self.dx * dt * self.velocity
@@ -58,5 +65,5 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.centery = int(self.y)
 
         self.collision(borders, obstacles)
-        if self.collisions > 5:
+        if self.collisions > 3:
             self.kill()
