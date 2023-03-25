@@ -1,7 +1,9 @@
 import pygame
+import random
 from gun import Gun
 from bullet import Bullet
 from border import Border
+from obstacle import Obstacle
 from math import atan2, degrees
 pygame.init()
 
@@ -19,6 +21,9 @@ bullets = pygame.sprite.Group()
 particles = []
 # mängu borderid
 borders = pygame.sprite.Group()
+# mingid teised obstacles
+map_of_obstacles = []
+obstacles = pygame.sprite.Group()
 
 
 def get_angle(x2, y2, x1, y1):
@@ -34,6 +39,29 @@ right_border = Border(620, 10, 460, 90)
 bottom_border = Border(10, 460, 620, 0)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
+
+
+new_obstacle = Obstacle(random.randint(90, screen.get_height() - 90), random.randint(50, screen.get_width() - 50))
+map_of_obstacles.append([new_obstacle.width, new_obstacle.rect.x, new_obstacle.rect.y])
+obstacles.add(new_obstacle)
+player_box = (420, 240+190)
+
+# genereerib need plokkid maailma
+while len(map_of_obstacles) < 3:
+
+    x_cord = random.randint(90, screen.get_height() - 50)
+    y_cord = random.randint(50, screen.get_width() - 90)
+
+    for obj in map_of_obstacles:
+
+        if (obj[1]+50+ 10) > x_cord and (obj[1]+50 - 10) < x_cord:
+            if (obj[0]+90 + 10) > y_cord and (obj[0]+90 - 10) < y_cord:
+                if x_cord not in player_box and y_cord not in player_box:
+                    new_obstacle = Obstacle(x_cord, y_cord)
+
+                    map_of_obstacles.append([new_obstacle.rect.x, new_obstacle.rect.y])
+                    obstacles.add(new_obstacle)
+
 
 while running:
     screen.fill((0, 0, 0))
@@ -55,12 +83,13 @@ while running:
                 bullets.add(new_bullet)
 
     gun_group.update(mouse_x, mouse_y, degrees(rads))
-    bullets.update(dt, borders)
+    bullets.update(dt, borders, obstacles)
 
     # ekraanile joonistamine
     bullets.draw(screen)
     gun_group.draw(screen)
     borders.draw(screen)
+    obstacles.draw(screen)
 
     pygame.display.update()
 pygame.quit()

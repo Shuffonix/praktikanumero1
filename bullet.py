@@ -10,7 +10,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rad = rad
         self.dx = cos(self.rad)
         self.dy = -sin(self.rad)  # fuck põdra ja fuck matemaatika bruh
-        self.origin = pygame.Surface((20, 10), pygame.SRCALPHA)
+        self.origin = pygame.Surface((15, 10), pygame.SRCALPHA)
         self.origin.fill((255, 100, 0))
         self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
         self.rect = self.image.get_rect()
@@ -20,7 +20,7 @@ class Bullet(pygame.sprite.Sprite):
         self.collisions = 0
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
-    def collision(self, borders):
+    def collision(self, borders, obstacles):
         collisions = 0
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
@@ -34,15 +34,29 @@ class Bullet(pygame.sprite.Sprite):
                 self.rad = atan2(self.dy, -self.dx)
                 self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
+        # collision lisaplokkidega, vahepeal täitsa imelik
+        for obstacle in obstacles:
+            if pygame.sprite.collide_mask(self, obstacle):
+                collision = 1
+                print(pygame.sprite.collide_mask(self, obstacle))
+                comp = pygame.sprite.collide_mask(self, obstacle)
+                if comp[0] != 0 and comp[1] > 0 or comp[0] == 0 and comp[1] > 0:
+                    self.dx *= -1
+                else:
+                    self.dy *= -1
+                self.rad = atan2(self.dy, -self.dx)
+                self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
+                self.mask = pygame.mask.from_surface(self.image)
+
         self.collisions += collisions
 
-    def update(self, dt, borders):
+    def update(self, dt, borders, obstacles):
         self.x += self.dx * dt * self.velocity
         self.y += self.dy * dt * self.velocity
 
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
 
-        self.collision(borders)
-        if self.collisions > 3:
+        self.collision(borders, obstacles)
+        if self.collisions > 5:
             self.kill()
