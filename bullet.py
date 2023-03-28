@@ -1,7 +1,6 @@
 import pygame
 from math import degrees, cos, sin, atan2
 
-
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, rad):
         pygame.sprite.Sprite.__init__(self)
