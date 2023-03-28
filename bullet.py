@@ -22,42 +22,23 @@ class Bullet(pygame.sprite.Sprite):
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
     def collisionBorder(self, borders):
         print(self.collisions)
-        collisions = 0
+
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
-                collisions = 1
+                self.collisions += 1
 
                 if border.angle == 90:
                     self.dx *= -1
                 else:
                     self.dy *= -1
                 self.velocity /= 1.4
-                self.collisions += 1
+
                 self.rad = atan2(self.dy, -self.dx)
                 self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
-        self.collisions += collisions
 
-    def collisionBlocks(self, obstacles):
-        # collision lisaplokkidega, vahepeal täitsa imelik, mis nüüdseks on juba 90% ajast WTF
-        collisions = 0
-        for obstacle in obstacles:
-            if pygame.sprite.collide_mask(self, obstacle):
-                collisions = 1
-                comp = pygame.sprite.collide_mask(self, obstacle)
-                print(comp)
-                if comp[0] != 0 and comp[1] > 0 or comp[0] == 0 and comp[1] > 0:
-                    self.dx *= -1
 
-                else:
-                    self.dy *= -1
-                self.velocity /= 2
-                self.collisions += 1
-                self.rad = atan2(-self.dy, self.dx)
-                self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
-                self.mask = pygame.mask.from_surface(self.image)
 
-        self.collisions += collisions
 
     def update(self, dt, borders, obstacles):
         self.x += self.dx * dt * self.velocity
@@ -67,6 +48,6 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.centery = int(self.y)
 
         self.collisionBorder(borders)
-        self.collisionBlocks(obstacles)
-        if self.collisions > 3:
+        # self.collisionBlocks(obstacles)
+        if self.collisions > 9:
             self.kill()

@@ -32,10 +32,10 @@ def get_angle(x2, y2, x1, y1):
     return rad
 
 
-top_border = Border(10, 10, 620, 0)
-left_border = Border(10, 10, 460, 90)
-right_border = Border(620, 10, 460, 90)
-bottom_border = Border(10, 460, 620, 0)
+top_border = Border(10, 10, 620, 0, 10)
+left_border = Border(10, 10, 460, 90, 10)
+right_border = Border(620, 10, 460, 90, 10)
+bottom_border = Border(10, 460, 620, 0, 10)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
@@ -52,8 +52,14 @@ map_selection = [[[50, 250], [400, 200], [300, 350]],
 # genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
 nr = random.randint(0, len(map_selection)-1)
 for l in map_selection[nr]:
-    new_obj = Obstacle(l[0], l[1])
-    obstacles.add(new_obj)
+    left_border = Border(l[0], l[1], 50, 90, 1)
+    right_border = Border(l[0]+50, l[1], 50, 90, 1)
+    top_border = Border(l[0], l[1], 50, 0, 1)
+    bottom_border = Border(l[0], l[1]+50, 50, 0, 1)
+    for border in [top_border, left_border, right_border, bottom_border]:
+        borders.add(border)
+    #new_obj = Obstacle(l[0], l[1])
+    #obstacles.add(new_obj)
 
 
 # katkine idee
