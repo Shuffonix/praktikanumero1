@@ -51,7 +51,7 @@ map_selection = [[[50, 250], [400, 200], [300, 350]],
 
 # genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
 nr = random.randint(0, len(map_selection)-1)
-for l in [[50, 250], [400, 200], [300, 350]]:
+for l in map_selection[nr]:
     new_obj = Obstacle(l[0], l[1])
     obstacles.add(new_obj)
 
