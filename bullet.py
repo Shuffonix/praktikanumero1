@@ -17,21 +17,25 @@ class Bullet(pygame.sprite.Sprite):
         self.y = 240
         self.mask = pygame.mask.from_surface(self.image)
         self.collisions = 0
+        self.last_porge = None
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
     def collision(self, borders):
         collisions = 0
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
+                if border == self.last_porge:
+                    continue
                 collisions = 1
 
                 if border.angle == 90:
                     self.dx *= -1
                 else:
                     self.dy *= -1
-
+                self.last_porge = border
                 self.rad = atan2(self.dy, -self.dx)
-                self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
+                self.velocity *= 0.75
+                self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
         self.collisions += collisions
 
