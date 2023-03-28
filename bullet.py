@@ -1,5 +1,5 @@
 import pygame
-from math import degrees, cos, sin, atan2
+from math import degrees, cos, sin, atan2, pi
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -10,8 +10,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rad = rad
         self.dx = cos(self.rad)
         self.dy = -sin(self.rad)  # fuck põdra ja fuck matemaatika bruh
-        self.origin = pygame.Surface((20, 10), pygame.SRCALPHA)
-        self.origin.fill((255, 100, 0))
+        self.origin = pygame.image.load("bullet_image.png")
         self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
         self.rect = self.image.get_rect()
         self.x = 320
