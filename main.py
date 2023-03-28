@@ -6,6 +6,7 @@ from math import atan2, degrees
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
+background = pygame.image.load("star_background.png")
 
 running = True
 clock = pygame.time.Clock()
@@ -47,7 +48,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        # selle teeb veel paremaks, see hetkel ainult nii lol
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_presses = pygame.mouse.get_pressed()
             if mouse_presses[0]:
@@ -58,6 +58,7 @@ while running:
     bullets.update(dt, borders)
 
     # ekraanile joonistamine
+    screen.blit(background, (0, 0))
     bullets.draw(screen)
     gun_group.draw(screen)
     borders.draw(screen)
