@@ -31,8 +31,8 @@ def get_angle(x2, y2, x1, y1):
 
 top_border = Border(10, 10, 620, 0)
 left_border = Border(10, 10, 460, 90)
-right_border = Border(620, 10, 460, 90)
-bottom_border = Border(10, 460, 620, 0)
+right_border = Border(620, 10, 460, 270)
+bottom_border = Border(10, 460, 620, 180)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 

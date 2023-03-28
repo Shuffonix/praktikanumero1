@@ -28,10 +28,10 @@ class Bullet(pygame.sprite.Sprite):
                     continue
                 collisions = 1
 
-                if border.angle == 90:
-                    self.dx *= -1
-                else:
+                if border.angle % 180 == 0:
                     self.dy *= -1
+                else:
+                    self.dx *= -1
                 self.last_porge = border
                 self.rad = atan2(self.dy, -self.dx)
                 self.velocity *= 0.75
