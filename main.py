@@ -54,11 +54,12 @@ while running:
                 new_bullet = Bullet(rads)
                 bullets.add(new_bullet)
 
+    screen.blit(background, (0, 0))
     gun_group.update(mouse_x, mouse_y, degrees(rads))
-    bullets.update(dt, borders)
+    bullets.update(dt, borders, screen)
 
     # ekraanile joonistamine
-    screen.blit(background, (0, 0))
+
     bullets.draw(screen)
     gun_group.draw(screen)
     borders.draw(screen)
