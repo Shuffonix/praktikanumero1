@@ -2,7 +2,9 @@ import pygame
 from gun import Gun
 from bullet import Bullet
 from border import Border
+from explosion import Explosion
 from math import atan2, degrees, cos, sin
+from random import sample
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -18,9 +20,19 @@ gun_group.add(gun)
 bullets = pygame.sprite.Group()
 # hoiustan particleid mis tekivad kui kuul liiga palju bouncib
 bounce_particles = []
-death_particles = []
+death_particles = pygame.sprite.Group()
+
 # mängu borderid
 borders = pygame.sprite.Group()
+
+
+def time_to_size(particle_time):
+    if particle_time > 0.9:
+        return max(int(300 * (1 - particle[0])), 1)
+    elif particle_time > 0.7:
+        return 30
+    else:
+        return max(int((30 / 0.7) * particle[0]), 1)
 
 
 def get_angle(x2, y2, x1, y1):
@@ -65,9 +77,10 @@ while running:
                 if not particle[3]:
                     bounce_particles.append(particle)
                 else:
-                    particle[0] = 1
-                    death_particles.append(particle)
+                    death = Explosion(particle[2])
+                    death_particles.add(death)
 
+    death_particles.update()
     # ekraanile joonistamine
 
     bullets.draw(screen)
@@ -84,20 +97,7 @@ while running:
         particle[2][1] += dt * 400 * -sin(particle[1])
         particle[0] -= 0.5 * dt
 
-    for particle in death_particles[:]:
-        if particle[0] < 0:
-            death_particles.remove(particle)
-            continue
-        if particle[0] > 0.9:
-            size = max(int(500 * (1 - particle[0])), 1)
-        elif particle[0] > 0.7:
-            size = 50
-        else:
-            size = max(int((50 / 0.7) * particle[0]), 1)
-
-        pygame.draw.circle(screen, (255, 0, 0), particle[2], size)
-        particle[0] -= dt
-
+    death_particles.draw(screen)
     pygame.display.update()
 
 pygame.quit()
