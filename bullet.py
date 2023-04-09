@@ -18,11 +18,12 @@ class Bullet(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.collisions = 0
         self.last_porge = None
-        self.particles = []
+        self.dead = False
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
     def collision(self, borders):
         collisions = 0
+        particles = []
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
                 if border == self.last_porge:
@@ -35,7 +36,7 @@ class Bullet(pygame.sprite.Sprite):
                     self.dx *= -1
 
                 for i in range(3):
-                    self.particles.append([
+                    particles.append([
                         0.2,
                         radians(randint(border.angle - 110, border.angle - 70)),
                         list(self.rect.center)
@@ -47,23 +48,22 @@ class Bullet(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
         self.collisions += collisions
+        return particles
 
     def update(self, dt, borders, screen):
+        if self.dead:
+            self.kill()
+
         self.x += self.dx * dt * self.velocity
         self.y += self.dy * dt * self.velocity
 
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
 
-        self.collision(borders)
-        for particle in self.particles[:]:
-            if particle[0] <= 0:
-                self.particles.remove(particle)
-                break
-            pygame.draw.circle(screen, (170, 170, 170), particle[2], int(particle[0] * 100))
-            pygame.draw.circle(screen, (0, 0, 0), particle[2], int(particle[0] * 100), 1)
-            particle[2][0] += dt * 400 * cos(particle[1])
-            particle[2][1] += dt * 400 * -sin(particle[1])
-            particle[0] -= dt
+        particle_list = self.collision(borders)
+
         if self.collisions > 3:
-            self.kill()
+            self.dead = True
+
+        if particle_list:
+            return particle_list

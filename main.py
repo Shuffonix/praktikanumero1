@@ -2,7 +2,7 @@ import pygame
 from gun import Gun
 from bullet import Bullet
 from border import Border
-from math import atan2, degrees
+from math import atan2, degrees, cos, sin
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
@@ -56,7 +56,12 @@ while running:
 
     screen.blit(background, (0, 0))
     gun_group.update(mouse_x, mouse_y, degrees(rads))
-    bullets.update(dt, borders, screen)
+
+    for bullet in bullets:
+        particles_raw = bullet.update(dt, borders, screen)
+        if particles_raw:
+            for particle in particles_raw:
+                particles.append(particle)
 
     # ekraanile joonistamine
 
@@ -64,5 +69,16 @@ while running:
     gun_group.draw(screen)
     borders.draw(screen)
 
+    for particle in particles[:]:
+        if particle[0] < 0:
+            particles.remove(particle)
+            continue
+        pygame.draw.circle(screen, (170, 170, 170), particle[2], int(particle[0] * 100))
+        pygame.draw.circle(screen, (0, 0, 0), particle[2], int(particle[0] * 100), 1)
+        particle[2][0] += dt * 400 * cos(particle[1])
+        particle[2][1] += dt * 400 * -sin(particle[1])
+        particle[0] -= 0.5 * dt
+
     pygame.display.update()
+
 pygame.quit()
