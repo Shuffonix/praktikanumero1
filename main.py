@@ -17,7 +17,8 @@ gun_group.add(gun)
 # hoiustan siin aktiivseid kuule
 bullets = pygame.sprite.Group()
 # hoiustan particleid mis tekivad kui kuul liiga palju bouncib
-particles = []
+bounce_particles = []
+death_particles = []
 # mängu borderid
 borders = pygame.sprite.Group()
 
@@ -61,7 +62,11 @@ while running:
         particles_raw = bullet.update(dt, borders, screen)
         if particles_raw:
             for particle in particles_raw:
-                particles.append(particle)
+                if not particle[3]:
+                    bounce_particles.append(particle)
+                else:
+                    particle[0] = 1
+                    death_particles.append(particle)
 
     # ekraanile joonistamine
 
@@ -69,15 +74,29 @@ while running:
     gun_group.draw(screen)
     borders.draw(screen)
 
-    for particle in particles[:]:
+    for particle in bounce_particles[:]:
         if particle[0] < 0:
-            particles.remove(particle)
+            bounce_particles.remove(particle)
             continue
         pygame.draw.circle(screen, (170, 170, 170), particle[2], int(particle[0] * 100))
         pygame.draw.circle(screen, (0, 0, 0), particle[2], int(particle[0] * 100), 1)
         particle[2][0] += dt * 400 * cos(particle[1])
         particle[2][1] += dt * 400 * -sin(particle[1])
         particle[0] -= 0.5 * dt
+
+    for particle in death_particles[:]:
+        if particle[0] < 0:
+            death_particles.remove(particle)
+            continue
+        if particle[0] > 0.9:
+            size = max(int(500 * (1 - particle[0])), 1)
+        elif particle[0] > 0.7:
+            size = 50
+        else:
+            size = max(int((50 / 0.7) * particle[0]), 1)
+
+        pygame.draw.circle(screen, (255, 0, 0), particle[2], size)
+        particle[0] -= dt
 
     pygame.display.update()
 

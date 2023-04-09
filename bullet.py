@@ -22,24 +22,31 @@ class Bullet(pygame.sprite.Sprite):
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
     def collision(self, borders):
-        collisions = 0
         particles = []
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
                 if border == self.last_porge:
                     continue
-                collisions = 1
+                self.collisions += 1
 
                 if border.angle % 180 == 0:
                     self.dy *= -1
                 else:
                     self.dx *= -1
 
-                for i in range(3):
+                if self.collisions < 4:
+                    death_particle = 0
+                    amount = 3
+                else:
+                    death_particle = 1
+                    amount = 1
+
+                for i in range(amount):
                     particles.append([
                         0.2,
                         radians(randint(border.angle - 110, border.angle - 70)),
-                        list(self.rect.center)
+                        list(self.rect.center),
+                        death_particle
                     ])
 
                 self.last_porge = border
@@ -47,7 +54,6 @@ class Bullet(pygame.sprite.Sprite):
                 self.velocity *= 0.75
                 self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
-        self.collisions += collisions
         return particles
 
     def update(self, dt, borders, screen):
