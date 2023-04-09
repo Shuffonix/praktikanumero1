@@ -3,9 +3,9 @@ import pygame
 
 class Explosion(pygame.sprite.Sprite):
 
-    def __init__(self, center):
+    def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
-        self.size = 100
+        self.size = size
         self.anims = []
         for i in range(9):
             img = pygame.image.load("explosion_anim/regularExplosion0" + str(i) + ".png").convert()

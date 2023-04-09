@@ -4,11 +4,16 @@ from bullet import Bullet
 from border import Border
 from explosion import Explosion
 from math import atan2, degrees, cos, sin
-from random import sample
 pygame.init()
 
 screen = pygame.display.set_mode((640, 480))
 background = pygame.image.load("star_background.png")
+gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
+wall_bang_sound = pygame.mixer.Sound("sounds/bullet_bounce.wav")
+wall_bang_sound.set_volume(0.3)
+game_end_sound = pygame.mixer.Sound("sounds/game_end.wav")
+bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
+pygame.mixer.set_num_channels(20)
 
 running = True
 clock = pygame.time.Clock()
@@ -61,14 +66,17 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_presses = pygame.mouse.get_pressed()
-            if mouse_presses[0]:
-                new_bullet = Bullet(rads)
-                bullets.add(new_bullet)
+    mouse_presses = pygame.mouse.get_pressed()
+    if mouse_presses[0]:
+        now = pygame.time.get_ticks()
+        if now - gun.last_shot > 500:
+            gun.last_shot = now
+            new_bullet = Bullet(rads)
+            bullets.add(new_bullet)
+            gun_sound.play()
 
     screen.blit(background, (0, 0))
-    gun_group.update(mouse_x, mouse_y, degrees(rads))
+    gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
 
     for bullet in bullets:
         particles_raw = bullet.update(dt, borders, screen)
@@ -76,15 +84,18 @@ while running:
             for particle in particles_raw:
                 if not particle[3]:
                     bounce_particles.append(particle)
+                    wall_bang_sound.play()
                 else:
-                    death = Explosion(particle[2])
+                    death = Explosion(particle[2], 100)
                     death_particles.add(death)
+                    bullet_explode_sound.play()
 
     death_particles.update()
     # ekraanile joonistamine
 
     bullets.draw(screen)
     gun_group.draw(screen)
+    screen.blit(gun.cd_overlay, gun.cd_rect)
     borders.draw(screen)
 
     for particle in bounce_particles[:]:
