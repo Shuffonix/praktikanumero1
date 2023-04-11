@@ -15,6 +15,7 @@ class Gun(pygame.sprite.Sprite):
         self.cd_overlay = self.image.copy()
         self.cd_rect = self.cd_overlay.get_bounding_rect()
         self.protsent = 100
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, x, y, degs, screen):
         now = pygame.time.get_ticks()
@@ -35,4 +36,5 @@ class Gun(pygame.sprite.Sprite):
             self.cd_rect.right = self.rect.right
         else:
             self.cd_rect.left = self.rect.left
+        self.mask = pygame.mask.from_surface(self.image)
 
