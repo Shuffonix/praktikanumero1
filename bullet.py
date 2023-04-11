@@ -22,7 +22,7 @@ class Bullet(pygame.sprite.Sprite):
         self.dead = False
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
-    def collision(self, borders):
+    def collision(self, borders, enemies):
         particles = []
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
@@ -55,9 +55,13 @@ class Bullet(pygame.sprite.Sprite):
                 self.velocity *= 0.75
                 self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
+        for e in enemies:
+            if pygame.sprite.spritecollideany(self, enemies):
+                print('here')
+                e.kill()
         return particles
 
-    def update(self, dt, borders, screen):
+    def update(self, dt, borders, enemies, screen):
         if self.dead:
             self.kill()
 
@@ -67,7 +71,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
 
-        particle_list = self.collision(borders)
+        particle_list = self.collision(borders, enemies)
 
         if self.collisions > 3:
             self.dead = True
