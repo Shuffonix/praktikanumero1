@@ -2,7 +2,8 @@ import pygame
 from gun import Gun
 from bullet import Bullet
 from border import Border
-from math import atan2, degrees
+from explosion import Explosion
+from math import atan2, degrees, cos, sin
 pygame.init()
 
 
@@ -14,6 +15,12 @@ speed = 100
 
 screen = pygame.display.set_mode((640, 480))
 background = pygame.image.load("star_background.png")
+gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
+wall_bang_sound = pygame.mixer.Sound("sounds/bullet_bounce.wav")
+wall_bang_sound.set_volume(0.3)
+game_end_sound = pygame.mixer.Sound("sounds/game_end.wav")
+bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
+pygame.mixer.set_num_channels(20)
 
 
 kell = pygame.time.Clock()
@@ -29,9 +36,20 @@ gun_group.add(gun)
 # hoiustan siin aktiivseid kuule
 bullets = pygame.sprite.Group()
 # hoiustan particleid mis tekivad kui kuul liiga palju bouncib
-particles = []
+bounce_particles = []
+death_particles = pygame.sprite.Group()
+
 # mängu borderid
 borders = pygame.sprite.Group()
+
+
+def time_to_size(particle_time):
+    if particle_time > 0.9:
+        return max(int(300 * (1 - particle[0])), 1)
+    elif particle_time > 0.7:
+        return 30
+    else:
+        return max(int((30 / 0.7) * particle[0]), 1)
 
 
 def get_angle(x2, y2, x1, y1):
@@ -43,8 +61,8 @@ def get_angle(x2, y2, x1, y1):
 
 top_border = Border(10, 10, 620, 0)
 left_border = Border(10, 10, 460, 90)
-right_border = Border(620, 10, 460, 90)
-bottom_border = Border(10, 460, 620, 0)
+right_border = Border(620, 10, 460, 270)
+bottom_border = Border(10, 460, 620, 180)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
@@ -60,20 +78,49 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_presses = pygame.mouse.get_pressed()
-            if mouse_presses[0]:
-                new_bullet = Bullet(rads)
-                bullets.add(new_bullet)
+    mouse_presses = pygame.mouse.get_pressed()
+    if mouse_presses[0]:
+        now = pygame.time.get_ticks()
+        if now - gun.last_shot > 500:
+            gun.last_shot = now
+            new_bullet = Bullet(rads)
+            bullets.add(new_bullet)
+            gun_sound.play()
 
-    gun_group.update(mouse_x, mouse_y, degrees(rads))
-    bullets.update(dt, borders)
-
-    # ekraanile joonistamine
     screen.blit(background, (0, 0))
+    gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
+
+    for bullet in bullets:
+        particles_raw = bullet.update(dt, borders, screen)
+        if particles_raw:
+            for particle in particles_raw:
+                if not particle[3]:
+                    bounce_particles.append(particle)
+                    wall_bang_sound.play()
+                else:
+                    death = Explosion(particle[2], 100)
+                    death_particles.add(death)
+                    bullet_explode_sound.play()
+
+    death_particles.update()
+    # ekraanile joonistamine
+
     bullets.draw(screen)
     gun_group.draw(screen)
+    screen.blit(gun.cd_overlay, gun.cd_rect)
     borders.draw(screen)
 
+    for particle in bounce_particles[:]:
+        if particle[0] < 0:
+            bounce_particles.remove(particle)
+            continue
+        pygame.draw.circle(screen, (170, 170, 170), particle[2], int(particle[0] * 100))
+        pygame.draw.circle(screen, (0, 0, 0), particle[2], int(particle[0] * 100), 1)
+        particle[2][0] += dt * 400 * cos(particle[1])
+        particle[2][1] += dt * 400 * -sin(particle[1])
+        particle[0] -= 0.5 * dt
+
+    death_particles.draw(screen)
     pygame.display.update()
+
 pygame.quit()
