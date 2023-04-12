@@ -34,7 +34,7 @@ ingame = False
 endgame = False
 
 clock = pygame.time.Clock()
-gun = Gun(320, 240)
+gun = Gun(315, 248)
 gun_group = pygame.sprite.Group()
 gun_group.add(gun)
 
@@ -93,9 +93,20 @@ for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
 
-size = 25
-flag = True
-counter = 0
+
+# enemy spawnimise süsteem
+dont_spawn =[ [250, 200], [250, 250], [300, 200], [300, 200], [300, 250]]  # arvestasin playeri dimensioonid siia sisse
+spawn_area = []
+
+for x in range(50, 550, 50):
+    for y in range(50, 450, 50):
+        if [x, y] not in map_selection[nr] and [x, y] not in dont_spawn:
+            spawn_area.append([x, y])
+
+def generate_enemy():
+    return random.choice(spawn_area)
+
+sceduled_enemies = []
 
 while running:
 
@@ -187,11 +198,21 @@ while running:
 
         death_particles.update()
         # ekraanile joonistamine
+
+
+        # enemy loogika
         for e in enemies:
             e.update()
 
-        if len(enemies) == 0:
-            enemies.append(Enemy(screen, random.randint(5, 55)*10, random.randint(5, 35)*10))
+        # enemy spawnimise loogika
+        if random.randint(1, 100) == 50 and len(enemies) < 3:
+            for i in range(random.randint(1, 5)):
+                x, y = generate_enemy()
+                sceduled_enemies.append(Enemy(screen, x, y))
+        if random.randint(1, 100) % 17 == 0 and len(sceduled_enemies):
+            enemies.append(sceduled_enemies[0])
+            sceduled_enemies.pop(0)
+
         #enemies.draw(screen)
         #enemies.update()
         bullets.draw(screen)

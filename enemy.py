@@ -8,7 +8,7 @@ class Enemy():
         self.basesize = 24
         self.x = x + 25
         self.y = y + 25
-        self.circlerect = pygame.draw.circle(self.screen, (255,0,0), (self.x, self.y), self.basesize)
+        self.circlerect = pygame.draw.circle(self.screen, (255,0,0), (self.x, self.y), 25-(self.basesize))
         self.flag = False
         self.counter = 0
 

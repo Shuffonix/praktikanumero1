@@ -60,7 +60,7 @@ class Bullet(pygame.sprite.Sprite):
             for e in enemies:
 
                 if self.rect.colliderect(e.return_rect()):
-
+                    self.dead = True
                     enemies.remove(e)
         return particles
 
