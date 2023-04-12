@@ -1,4 +1,5 @@
-import pygame, random
+import pygame
+import random
 from gun import Gun
 from bullet import Bullet
 from border import Border
@@ -18,13 +19,13 @@ return_button = pygame.image.load("returnmenu.png")
 return_rect = return_button.get_rect(center=(100, 100))
 
 gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
-gun_sound.set_volume(0.5)
+gun_sound.set_volume(0.2)
 wall_bang_sound = pygame.mixer.Sound("sounds/bullet_bounce.wav")
-wall_bang_sound.set_volume(0.2)
+wall_bang_sound.set_volume(0.1)
 game_end_sound = pygame.mixer.Sound("sounds/game_end.wav")
-game_end_sound.set_volume(0.5)
+game_end_sound.set_volume(0.1)
 bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
-bullet_explode_sound.set_volume(0.5)
+bullet_explode_sound.set_volume(0.3)
 pygame.mixer.set_num_channels(20)
 
 
@@ -48,8 +49,8 @@ death_particles = pygame.sprite.Group()
 borders = pygame.sprite.Group()
 
 # enemies
-enemies = []
-enemies.append(Enemy(screen, 350, 350))
+enemies = pygame.sprite.Group()
+
 
 def time_to_size(particle_time):
     if particle_time > 0.9:
@@ -66,51 +67,95 @@ def get_angle(x2, y2, x1, y1):
     rad = atan2(-dy, dx)
     return rad
 
-map_selection = [[[50, 250], [400, 200], [300, 350]],
-                 [[300, 350], [450, 50], [400, 150], [500, 50], [150, 150]],
-                 [[250, 50], [450, 350], [150, 150]],
-                 [[400, 200], [50, 300], [50, 50], [500, 350]],
-                 [[100, 200], [350, 150], [50, 350]],
-                 [[500, 300], [350, 250], [450, 100], [200, 50], [200, 350]],
-                 [[100, 100], [400, 50], [500, 50], [50, 300], [400, 50], [350, 150], [350, 150]]
-                 ]
+
+map_selection = [
+    [[50, 250], [400, 200], [300, 350]],
+    [[300, 350], [450, 50], [400, 150], [500, 50], [150, 150]],
+    [[250, 50], [450, 350], [150, 150]],
+    [[400, 200], [50, 300], [50, 50], [500, 350]],
+    [[100, 200], [350, 150], [50, 350]],
+    [[500, 300], [350, 250], [450, 100], [200, 50], [200, 350]],
+    [[100, 100], [400, 50], [500, 50], [50, 300], [400, 50], [350, 150], [350, 150]]
+]
+
 
 # genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
-nr = random.randint(0, len(map_selection)-1)
-for l in map_selection[nr]:
-    left_border = Border(l[0], l[1], 50, 90, 1)
-    right_border = Border(l[0]+50, l[1], 50, 90, 1)
-    top_border = Border(l[0], l[1], 50, 0, 1)
-    bottom_border = Border(l[0], l[1]+50, 50, 0, 1)
-    for border in [top_border, left_border, right_border, bottom_border]:
-        borders.add(border)
+def generate_obstacles():
+    sidewalls = []
+    nr = random.randint(0, len(map_selection)-1)
+    for l in map_selection[nr]:
+        left = Border(l[0], l[1], 50, 90, 1)
+        sidewalls.append(left)
+
+        right = Border(l[0] + 50, l[1], 50, 90, 1)
+        sidewalls.append(right)
+
+        top = Border(l[0], l[1], 50, 0, 1)
+        sidewalls.append(top)
+
+        bottom = Border(l[0], l[1] + 50, 50, 0, 1)
+        sidewalls.append(bottom)
+    return sidewalls
+
 
 top_border = Border(10, 10, 620, 0)
 left_border = Border(10, 10, 460, 90)
 right_border = Border(620, 10, 460, 270)
 bottom_border = Border(10, 460, 620, 180)
-for border in [top_border, left_border, right_border, bottom_border]:
+main_walls = [top_border, left_border, right_border, bottom_border]
+for border in main_walls:
     borders.add(border)
 
 
 
 # enemy spawnimise süsteem
-dont_spawn =[ [250, 200], [250, 250], [300, 200], [300, 200], [300, 250]]  # arvestasin playeri dimensioonid siia sisse
+dont_spawn = [[250, 200], [250, 250], [300, 200], [300, 200], [300, 250]]  # arvestasin playeri dimensioonid siia sisse
 spawn_area = []
+taken_area = []
 
-for x in range(50, 550, 50):
-    for y in range(50, 450, 50):
-        if [x, y] not in map_selection[nr] and [x, y] not in dont_spawn:
-            spawn_area.append([x, y])
 
-def generate_enemy():
-    return random.choice(spawn_area)
+def spawn_enemy():
+    global enemies, borders, bullets
+    test_rect = pygame.Rect(0, 0, 30, 30)
+    gun_rect = pygame.Rect(270, 190, 100, 100)
+    point = False
+    while not point:
+        valid = True
+        center = (random.randint(0, 640), random.randint(0, 480))
+        test_rect.center = center
+        for enemy in enemies:
+            if test_rect.colliderect(enemy.rect):
+                valid = False
+                break
+        if not valid:
+            continue
+
+        for border in borders:
+            if test_rect.colliderect(border.rect):
+                valid = False
+                break
+        if not valid:
+            continue
+
+        for bullet in bullets:
+            if test_rect.colliderect(bullet.rect):
+                valid = False
+                break
+        if not valid:
+            continue
+
+        if test_rect.colliderect(gun_rect):
+            valid = False
+        if not valid:
+            continue
+
+        point = Enemy(center[0], center[1])
+    enemies.add(point)
+
 
 sceduled_enemies = []
 
 while running:
-
-
     bullet = False
     while menu:
         dt = clock.tick(144) / 1000
@@ -121,6 +166,7 @@ while running:
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
 
         gun_group.draw(screen)
+        borders.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
         screen.blit(newgame_button, newgame_rect)
         for event in pygame.event.get():
@@ -129,8 +175,8 @@ while running:
                 running = False
                 break
         mouse_presses = pygame.mouse.get_pressed()
-        if newgame_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
-            if mouse_presses[0]:
+        if mouse_presses[0]:
+            if newgame_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
                 now = pygame.time.get_ticks()
                 if now - gun.last_shot > 500:
                     gun.last_shot = now
@@ -139,7 +185,7 @@ while running:
                     gun_sound.play()
 
         if bullet:
-            bullet.update(dt, borders, enemies, screen)
+            bullet.update(dt, main_walls, screen)
             bullets.draw(screen)
             if bullet.rect.colliderect(newgame_rect):
                 menu = False
@@ -148,9 +194,9 @@ while running:
 
         pygame.display.update()
     bullet.kill()
-
-
-
+    walls = generate_obstacles()
+    for wall in walls:
+        borders.add(wall)
     while ingame:
         screen.fill((0, 0, 0))
         keys = pygame.key.get_pressed()
@@ -178,7 +224,7 @@ while running:
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
 
         for bullet in bullets:
-            particles_raw = bullet.update(dt, borders, enemies, screen)
+            particles_raw = bullet.update(dt, borders, screen)
             if particles_raw:
                 for particle in particles_raw:
                     if not particle[3]:
@@ -188,33 +234,27 @@ while running:
                         death = Explosion(particle[2], 100)
                         death_particles.add(death)
                         bullet_explode_sound.play()
-            #if pygame.sprite.collide_mask(gun, bullet):
-                """if bullet.collisions > 0:
+            if pygame.sprite.collide_mask(gun, bullet):
+                if bullet.collisions > 0:
                     ingame = False
                     endgame = True
                     pygame.mixer.stop()
                     game_end_sound.play()
-                    break"""
+                    break
 
         death_particles.update()
         # ekraanile joonistamine
 
 
         # enemy loogika
-        for e in enemies:
-            e.update()
+        enemies.update(dt, bullets)
 
         # enemy spawnimise loogika
         if random.randint(1, 100) == 50 and len(enemies) < 3:
-            for i in range(random.randint(1, 5)):
-                x, y = generate_enemy()
-                sceduled_enemies.append(Enemy(screen, x, y))
-        if random.randint(1, 100) % 17 == 0 and len(sceduled_enemies):
-            enemies.append(sceduled_enemies[0])
-            sceduled_enemies.pop(0)
+            spawn_enemy()
 
-        #enemies.draw(screen)
-        #enemies.update()
+
+        enemies.draw(screen)
         bullets.draw(screen)
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
@@ -234,7 +274,10 @@ while running:
         pygame.display.update()
     for bullet in bullets:
         bullet.kill()
-
+    for border in borders:
+        border.kill()
+    for wall in main_walls:
+        borders.add(wall)
     while endgame:
         screen.fill((0, 0, 0))
         screen.blit(return_button, return_rect)
