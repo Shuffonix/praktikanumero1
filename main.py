@@ -48,8 +48,8 @@ death_particles = pygame.sprite.Group()
 borders = pygame.sprite.Group()
 
 # enemies
-enemies = pygame.sprite.Group()
-enemies.add(Enemy(350, 350))
+enemies = []
+enemies.append(Enemy(screen, 350, 350))
 
 def time_to_size(particle_time):
     if particle_time > 0.9:
@@ -92,6 +92,11 @@ bottom_border = Border(10, 460, 620, 180)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
+
+size = 25
+flag = True
+counter = 0
+
 while running:
 
 
@@ -123,7 +128,7 @@ while running:
                     gun_sound.play()
 
         if bullet:
-            bullet.update(dt, borders, screen)
+            bullet.update(dt, borders, enemies, screen)
             bullets.draw(screen)
             if bullet.rect.colliderect(newgame_rect):
                 menu = False
@@ -162,7 +167,7 @@ while running:
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
 
         for bullet in bullets:
-            particles_raw = bullet.update(dt, borders, screen)
+            particles_raw = bullet.update(dt, borders, enemies, screen)
             if particles_raw:
                 for particle in particles_raw:
                     if not particle[3]:
@@ -182,8 +187,13 @@ while running:
 
         death_particles.update()
         # ekraanile joonistamine
+        for e in enemies:
+            e.update()
 
-        enemies.draw(screen)
+        if len(enemies) == 0:
+            enemies.append(Enemy(screen, random.randint(5, 55)*10, random.randint(5, 35)*10))
+        #enemies.draw(screen)
+        #enemies.update()
         bullets.draw(screen)
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)

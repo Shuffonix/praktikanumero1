@@ -1,29 +1,37 @@
 import pygame
 
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.origin = pygame.image.load("circle-removebg-preview.png").convert_alpha()
-        self.size = 1
-        self.image = pygame.transform.scale(self.origin, (1153//(10*self.size), 655//(10*self.size)))
-        self.rect = self.image.get_rect()
-        self.rect.y = y
-        self.rect.x = x + 25
-        self.mask = pygame.mask.from_surface(self.image)
+
+# liikusin tagasi pygame Rect objekti peale, pildiga oli suuruse muutmine paras nuss
+class Enemy():
+    def __init__(self, screen, x, y):
+        self.screen = screen
+        self.basesize = 24
+        self.x = x + 25
+        self.y = y + 25
+        self.circlerect = pygame.draw.circle(self.screen, (255,0,0), (self.x, self.y), self.basesize)
+        self.flag = False
         self.counter = 0
-        self.peak = False
 
     def update(self):
-        if self.size < 10 and self.counter == 10 and not self.peak:
-            self.counter = 0
-            self.size += 1
-        elif self.size > 0 and self.peak and self.counter == 10:
-            self.size += 1
-            self.counter = 0
+        #print(self.circlerect)
+        if self.counter == 20:
 
-        if self.peak < 10 and not self.peak:
-            self.counter += 1
+            if self.basesize > 23:
+                self.flag = True
+            elif self.basesize < 5:
+                self.flag = False
+
+            if self.flag:
+                self.basesize -= 1
+            else:
+                self.basesize += 1
+            self.counter = 0
         else:
-            self.counter -= 1
+            self.counter += 1
+
+        self.circlerect = pygame.draw.circle(self.screen, (255, 0, 0), (self.x, self.y), 25-(self.basesize))
+
+    def return_rect(self):
+        return self.circlerect
 
 
