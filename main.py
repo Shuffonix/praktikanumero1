@@ -93,6 +93,8 @@ for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
 while running:
+
+
     bullet = False
     while menu:
         dt = clock.tick(144) / 1000
@@ -101,7 +103,7 @@ while running:
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
-        borders.draw(screen)
+
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
         screen.blit(newgame_button, newgame_rect)
@@ -130,6 +132,8 @@ while running:
 
         pygame.display.update()
     bullet.kill()
+
+
 
     while ingame:
         screen.fill((0, 0, 0))
@@ -168,17 +172,18 @@ while running:
                         death = Explosion(particle[2], 100)
                         death_particles.add(death)
                         bullet_explode_sound.play()
-            if pygame.sprite.collide_mask(gun, bullet):
-                if bullet.collisions > 0:
+            #if pygame.sprite.collide_mask(gun, bullet):
+                """if bullet.collisions > 0:
                     ingame = False
                     endgame = True
                     pygame.mixer.stop()
                     game_end_sound.play()
-                    break
+                    break"""
 
         death_particles.update()
         # ekraanile joonistamine
 
+        enemies.draw(screen)
         bullets.draw(screen)
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
