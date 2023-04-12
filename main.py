@@ -1,15 +1,37 @@
 import pygame
-import random
 from gun import Gun
 from bullet import Bullet
 from border import Border
-from obstacle import Obstacle
-from math import atan2, degrees
+from explosion import Explosion
+from math import atan2, degrees, cos, sin
 pygame.init()
 
+font = pygame.font.SysFont("Times New Roman", 32)
 screen = pygame.display.set_mode((640, 480))
+background = pygame.image.load("star_background.png")
+title = pygame.image.load("title_icon.png")
+title_rect = title.get_rect(center=(320, 70))
+newgame_button = pygame.image.load("newgame_button.png")
+newgame_rect = newgame_button.get_rect(center=(150, 400))
+return_button = pygame.image.load("returnmenu.png")
+return_rect = return_button.get_rect(center=(100, 100))
+
+gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
+gun_sound.set_volume(0.5)
+wall_bang_sound = pygame.mixer.Sound("sounds/bullet_bounce.wav")
+wall_bang_sound.set_volume(0.2)
+game_end_sound = pygame.mixer.Sound("sounds/game_end.wav")
+game_end_sound.set_volume(0.5)
+bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
+bullet_explode_sound.set_volume(0.5)
+pygame.mixer.set_num_channels(20)
+
 
 running = True
+menu = True
+ingame = False
+endgame = False
+
 clock = pygame.time.Clock()
 gun = Gun(320, 240)
 gun_group = pygame.sprite.Group()
@@ -18,11 +40,20 @@ gun_group.add(gun)
 # hoiustan siin aktiivseid kuule
 bullets = pygame.sprite.Group()
 # hoiustan particleid mis tekivad kui kuul liiga palju bouncib
-particles = []
+bounce_particles = []
+death_particles = pygame.sprite.Group()
+
 # mängu borderid
 borders = pygame.sprite.Group()
-# mingid teised obstacles
-obstacles = pygame.sprite.Group()
+
+
+def time_to_size(particle_time):
+    if particle_time > 0.9:
+        return max(int(300 * (1 - particle[0])), 1)
+    elif particle_time > 0.7:
+        return 30
+    else:
+        return max(int((30 / 0.7) * particle[0]), 1)
 
 
 def get_angle(x2, y2, x1, y1):
@@ -34,75 +65,131 @@ def get_angle(x2, y2, x1, y1):
 
 top_border = Border(10, 10, 620, 0)
 left_border = Border(10, 10, 460, 90)
-right_border = Border(620, 10, 460, 90)
-bottom_border = Border(10, 460, 620, 0)
+right_border = Border(620, 10, 460, 270)
+bottom_border = Border(10, 460, 620, 180)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
-# huiasin sellega mingi 2h, ei saanud head tulemit random genereerimisega, võid vaadata üle kui tahad
-map_selection = [[[50, 250], [400, 200], [300, 350]],
-                 [[300, 350], [450, 50], [400, 150], [500, 50], [150, 150]],
-                 [[250, 50], [450, 350], [150, 150]],
-                 [[400, 200], [50, 300], [50, 50], [500, 350]],
-                 [[100, 200], [350, 150], [50, 350]],
-                 [[500, 300], [350, 250], [450, 100], [200, 50], [200, 350]],
-                 [[100, 100], [400, 50], [500, 50], [50, 300], [400, 50], [350, 150], [350, 150]]
-                 ]
-
-# genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
-nr = random.randint(0, len(map_selection)-1)
-for l in [[50, 250], [400, 200], [300, 350]]:
-    new_obj = Obstacle(l[0], l[1])
-    obstacles.add(new_obj)
-
-
-# katkine idee
-"""while len(map_of_obstacles) < 2:
-
-    x_cord = random.randint(90, screen.get_height() - 50)
-    y_cord = random.randint(50, screen.get_width() - 90)
-    # new_obstacle = Obstacle(x_cord, y_cord)
-    print(x_cord, y_cord)
-    for obj in map_of_obstacles:
-        print(map_of_obstacles)
-        if (obj[1]+50+ 10) < x_cord and (obj[1] - 10) > x_cord:
-
-            if (obj[1] + 10) > y_cord or (obj[1]+90 - 10) < y_cord:
-                if x_cord not in player_box and y_cord not in player_box:
-                    new_obstacle = Obstacle(x_cord, y_cord)
-
-                    map_of_obstacles.append([new_obstacle.rect.x, new_obstacle.rect.y])
-                    obstacles.add(new_obstacle)"""
-
-
 while running:
-    #print(obstacles)
-    screen.fill((0, 0, 0))
-    keys = pygame.key.get_pressed()
-    mouse = pygame.mouse.get_pressed()
-    mouse_x, mouse_y = pygame.mouse.get_pos()
-    dt = clock.tick(144) / 1000
-    rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        # selle teeb veel paremaks, see hetkel ainult nii lol
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_presses = pygame.mouse.get_pressed()
+    bullet = False
+    while menu:
+        dt = clock.tick(144) / 1000
+        screen.fill((0, 0, 0))
+        screen.blit(title, title_rect)
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
+        gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
+        borders.draw(screen)
+        gun_group.draw(screen)
+        screen.blit(gun.cd_overlay, gun.cd_rect)
+        screen.blit(newgame_button, newgame_rect)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                menu = False
+                running = False
+                break
+        mouse_presses = pygame.mouse.get_pressed()
+        if newgame_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
             if mouse_presses[0]:
+                now = pygame.time.get_ticks()
+                if now - gun.last_shot > 500:
+                    gun.last_shot = now
+                    bullet = Bullet(rads)
+                    bullets.add(bullet)
+                    gun_sound.play()
+
+        if bullet:
+            bullet.update(dt, borders, screen)
+            bullets.draw(screen)
+            if bullet.rect.colliderect(newgame_rect):
+                menu = False
+                ingame = True
+                death_particles.add(Explosion(newgame_rect.center, 250))
+
+        pygame.display.update()
+    bullet.kill()
+
+    while ingame:
+        screen.fill((0, 0, 0))
+        keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pressed()
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        dt = clock.tick(144) / 1000
+        rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                ingame = False
+                running = False
+                break
+
+        mouse_presses = pygame.mouse.get_pressed()
+        if mouse_presses[0]:
+            now = pygame.time.get_ticks()
+            if now - gun.last_shot > 500:
+                gun.last_shot = now
                 new_bullet = Bullet(rads)
                 bullets.add(new_bullet)
+                gun_sound.play()
 
-    gun_group.update(mouse_x, mouse_y, degrees(rads))
-    bullets.update(dt, borders, obstacles)
+        screen.blit(background, (0, 0))
+        gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
 
-    # ekraanile joonistamine
-    bullets.draw(screen)
-    gun_group.draw(screen)
-    borders.draw(screen)
-    obstacles.draw(screen)
+        for bullet in bullets:
+            particles_raw = bullet.update(dt, borders, screen)
+            if particles_raw:
+                for particle in particles_raw:
+                    if not particle[3]:
+                        bounce_particles.append(particle)
+                        wall_bang_sound.play()
+                    else:
+                        death = Explosion(particle[2], 100)
+                        death_particles.add(death)
+                        bullet_explode_sound.play()
+            if pygame.sprite.collide_mask(gun, bullet):
+                if bullet.collisions > 0:
+                    ingame = False
+                    endgame = True
+                    pygame.mixer.stop()
+                    game_end_sound.play()
+                    break
 
-    pygame.display.update()
+        death_particles.update()
+        # ekraanile joonistamine
+
+        bullets.draw(screen)
+        gun_group.draw(screen)
+        screen.blit(gun.cd_overlay, gun.cd_rect)
+        borders.draw(screen)
+
+        for particle in bounce_particles[:]:
+            if particle[0] < 0:
+                bounce_particles.remove(particle)
+                continue
+            pygame.draw.circle(screen, (170, 170, 170), particle[2], int(particle[0] * 100))
+            pygame.draw.circle(screen, (0, 0, 0), particle[2], int(particle[0] * 100), 1)
+            particle[2][0] += dt * 400 * cos(particle[1])
+            particle[2][1] += dt * 400 * -sin(particle[1])
+            particle[0] -= 0.5 * dt
+
+        death_particles.draw(screen)
+        pygame.display.update()
+    for bullet in bullets:
+        bullet.kill()
+
+    while endgame:
+        screen.fill((0, 0, 0))
+        screen.blit(return_button, return_rect)
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
+        gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
+        borders.draw(screen)
+        gun_group.draw(screen)
+        screen.blit(gun.cd_overlay, gun.cd_rect)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                endgame = False
+                running = False
+                break
+        pygame.display.update()
 pygame.quit()

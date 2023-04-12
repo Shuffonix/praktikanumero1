@@ -1,5 +1,6 @@
 import pygame
-from math import degrees, cos, sin, atan2
+from math import degrees, cos, sin, atan2, pi, radians
+from random import randint
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -10,63 +11,66 @@ class Bullet(pygame.sprite.Sprite):
         self.rad = rad
         self.dx = cos(self.rad)
         self.dy = -sin(self.rad)  # fuck põdra ja fuck matemaatika bruh
-        self.origin = pygame.Surface((15, 10), pygame.SRCALPHA)
-        self.origin.fill((255, 100, 0))
+        self.origin = pygame.image.load("bullet_image.png")
         self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
         self.rect = self.image.get_rect()
         self.x = 320
         self.y = 240
         self.mask = pygame.mask.from_surface(self.image)
         self.collisions = 0
+        self.last_porge = None
+        self.dead = False
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
-    def collisionBorder(self, borders):
-        print(self.collisions)
-        collisions = 0
+    def collision(self, borders):
+        particles = []
         for border in borders:
             if pygame.sprite.collide_mask(self, border):
-                collisions = 1
-
-                if border.angle == 90:
-                    self.dx *= -1
-                else:
-                    self.dy *= -1
-                self.velocity /= 1.4
+                if border == self.last_porge:
+                    continue
                 self.collisions += 1
+
+                if border.angle % 180 == 0:
+                    self.dy *= -1
+                else:
+                    self.dx *= -1
+
+                if self.collisions < 4:
+                    death_particle = 0
+                    amount = 3
+                else:
+                    death_particle = 1
+                    amount = 1
+
+                for i in range(amount):
+                    particles.append([
+                        0.2,
+                        radians(randint(border.angle - 110, border.angle - 70)),
+                        list(self.rect.center),
+                        death_particle
+                    ])
+
+                self.last_porge = border
                 self.rad = atan2(self.dy, -self.dx)
-                self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
+                self.velocity *= 0.75
+                self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
-        self.collisions += collisions
+        return particles
 
-    def collisionBlocks(self, obstacles):
-        # collision lisaplokkidega, vahepeal täitsa imelik, mis nüüdseks on juba 90% ajast WTF
-        collisions = 0
-        for obstacle in obstacles:
-            if pygame.sprite.collide_mask(self, obstacle):
-                collisions = 1
-                comp = pygame.sprite.collide_mask(self, obstacle)
-                print(comp)
-                if comp[0] != 0 and comp[1] > 0 or comp[0] == 0 and comp[1] > 0:
-                    self.dx *= -1
+    def update(self, dt, borders, screen):
+        if self.dead:
+            self.kill()
 
-                else:
-                    self.dy *= -1
-                self.velocity /= 2
-                self.collisions += 1
-                self.rad = atan2(-self.dy, self.dx)
-                self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
-                self.mask = pygame.mask.from_surface(self.image)
-
-        self.collisions += collisions
-
-    def update(self, dt, borders, obstacles):
         self.x += self.dx * dt * self.velocity
         self.y += self.dy * dt * self.velocity
 
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
 
-        self.collisionBorder(borders)
-        self.collisionBlocks(obstacles)
+        particle_list = self.collision(borders)
+
         if self.collisions > 3:
-            self.kill()
+            self.dead = True
+
+        if particle_list:
+            return particle_list
