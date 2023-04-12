@@ -1,9 +1,10 @@
-import pygame
+import pygame, random
 from gun import Gun
 from bullet import Bullet
 from border import Border
 from explosion import Explosion
 from math import atan2, degrees, cos, sin
+from enemy import Enemy
 pygame.init()
 
 font = pygame.font.SysFont("Times New Roman", 32)
@@ -46,6 +47,9 @@ death_particles = pygame.sprite.Group()
 # mängu borderid
 borders = pygame.sprite.Group()
 
+# enemies
+enemies = pygame.sprite.Group()
+enemies.add(Enemy(350, 350))
 
 def time_to_size(particle_time):
     if particle_time > 0.9:
@@ -62,6 +66,24 @@ def get_angle(x2, y2, x1, y1):
     rad = atan2(-dy, dx)
     return rad
 
+map_selection = [[[50, 250], [400, 200], [300, 350]],
+                 [[300, 350], [450, 50], [400, 150], [500, 50], [150, 150]],
+                 [[250, 50], [450, 350], [150, 150]],
+                 [[400, 200], [50, 300], [50, 50], [500, 350]],
+                 [[100, 200], [350, 150], [50, 350]],
+                 [[500, 300], [350, 250], [450, 100], [200, 50], [200, 350]],
+                 [[100, 100], [400, 50], [500, 50], [50, 300], [400, 50], [350, 150], [350, 150]]
+                 ]
+
+# genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
+nr = random.randint(0, len(map_selection)-1)
+for l in map_selection[nr]:
+    left_border = Border(l[0], l[1], 50, 90, 1)
+    right_border = Border(l[0]+50, l[1], 50, 90, 1)
+    top_border = Border(l[0], l[1], 50, 0, 1)
+    bottom_border = Border(l[0], l[1]+50, 50, 0, 1)
+    for border in [top_border, left_border, right_border, bottom_border]:
+        borders.add(border)
 
 top_border = Border(10, 10, 620, 0)
 left_border = Border(10, 10, 460, 90)
