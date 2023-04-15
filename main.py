@@ -107,6 +107,8 @@ def generate_enemy():
     return random.choice(spawn_area)
 
 sceduled_enemies = []
+score = 0
+
 
 while running:
 
@@ -188,6 +190,7 @@ while running:
                         death = Explosion(particle[2], 100)
                         death_particles.add(death)
                         bullet_explode_sound.play()
+                        score += bullet.score
             #if pygame.sprite.collide_mask(gun, bullet):
                 """if bullet.collisions > 0:
                     ingame = False
@@ -198,11 +201,11 @@ while running:
 
         death_particles.update()
         # ekraanile joonistamine
-
+        print(f'Score: {score}')
 
         # enemy loogika
         for e in enemies:
-            e.update(random.uniform(0, 1))
+            e.update(random.uniform(-1, 1))
 
         # enemy spawnimise loogika
         if random.randint(1, 100) == 50 and len(enemies) < 2:
