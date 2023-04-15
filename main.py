@@ -7,8 +7,8 @@ from math import atan2, degrees, cos, sin
 from enemy import Enemy
 pygame.init()
 
-font = pygame.font.SysFont("Times New Roman", 32)
-screen = pygame.display.set_mode((640, 480))
+font = pygame.font.Font('images/aesymatt.ttf', 24)
+screen = pygame.display.set_mode((800, 480))
 background = pygame.image.load("images/star_background.png")
 title = pygame.image.load("images/title_icon.png")
 title_rect = title.get_rect(center=(320, 70))
@@ -27,6 +27,12 @@ bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
 bullet_explode_sound.set_volume(0.5)
 pygame.mixer.set_num_channels(20)
 
+score_board = pygame.Surface((160, 50))
+def update_scoreboard(score):
+    score_board.fill((0, 0, 0))
+    text_surface = font.render(f'Score: {score}', True, (255, 255, 255))
+
+    score_board.blit(text_surface, dest=(10, 0))
 
 running = True
 menu = True
@@ -160,6 +166,9 @@ while running:
         dt = clock.tick(144) / 1000
         rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
 
+        update_scoreboard(score)
+        screen.blit(score_board, dest=(650, 50))
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 ingame = False
@@ -201,7 +210,7 @@ while running:
 
         death_particles.update()
         # ekraanile joonistamine
-        print(f'Score: {score}')
+        # print(f'Score: {score}')
 
         # enemy loogika
         enemies.update(dt, bullets)
