@@ -8,7 +8,7 @@ class Explosion(pygame.sprite.Sprite):
         self.size = size
         self.anims = []
         for i in range(9):
-            img = pygame.image.load("explosion_anim/regularExplosion0" + str(i) + ".png").convert()
+            img = pygame.image.load("assets/explosion_anim/regularExplosion0" + str(i) + ".png").convert()
             img.set_colorkey((0, 0, 0))
             img = pygame.transform.scale(img, (self.size, self.size))
             self.anims.append(img)

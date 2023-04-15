@@ -12,6 +12,7 @@ pygame.init()
 
 font = pygame.font.Font('assets/aesymatt.ttf', 24)
 screen = pygame.display.set_mode((640, 480+50))
+
 background = pygame.image.load("assets/star_background.png")
 title = pygame.image.load("assets/title_icon.png")
 title_rect = title.get_rect(center=(320, 70))
@@ -20,9 +21,7 @@ newgame_rect = newgame_button.get_rect(center=(150, 400))
 return_button = pygame.image.load("assets/returnmenu.png")
 return_rect = return_button.get_rect(center=(100, 100))
 heart = pygame.image.load("assets/heart.png")
-#heart = heart.set_colorkey((255, 255, 255, 255))
 heart = pygame.transform.scale(heart, (50, 50))
-print(heart.get_size())
 
 
 gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
@@ -188,8 +187,7 @@ while running:
 
         pygame.display.update()
         spawn_area = generate_enemy_grid()
-
-    bullet.kill()
+    # bullet.kill()
 
     # Mängu osa
     while ingame:
@@ -296,8 +294,6 @@ while running:
         death_particles.draw(screen)
         pygame.display.update()
 
-
-    # Lõpusosa
     for bullet in bullets:
         bullet.kill()
 
@@ -307,13 +303,14 @@ while running:
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
-        borders.draw(screen)
+
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 endgame = False
                 running = False
+                ingame = False
                 break
         pygame.display.update()
 pygame.quit()
