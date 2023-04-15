@@ -1,14 +1,14 @@
 import pygame
 
 
-# liikusin tagasi pygame Rect objekti peale, pildiga oli suuruse muutmine paras nuss
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, variation):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("images/enemy_image.png")
         self.image.set_colorkey((255, 255, 255))
         self.origin = self.image.copy()
         self.size = 1
+        self.variation = variation
         self.image = pygame.transform.smoothscale(self.origin, (self.size, self.size))
         self.center = (x + 25, y + 25)
         self.rect = self.image.get_bounding_rect()
@@ -24,26 +24,15 @@ class Enemy(pygame.sprite.Sprite):
             return self.worth
         now = pygame.time.get_ticks()
         if now - self.birth < 3000:
-            self.size += 10 * dt
+            self.worth = (now - self.birth)//100
+            self.size += 15 * dt * self.variation
         elif now - self.birth < 5500:
-            self.worth = 1
-            self.size -= 10 * dt
+            self.worth = (now - self.birth)//100
+            self.size -= 15 * dt * self.variation
         else:
             self.kill()
+
         self.image = pygame.transform.smoothscale(self.origin, (abs(int(self.size)), abs(int(self.size))))
         self.rect = self.image.get_bounding_rect()
         self.rect.center = self.center
-        """if self.counter == 20:
-            if self.basesize > 23:
-                self.flag = True
-            elif self.basesize < 5:
-                self.flag = False
-
-            if self.flag:
-                self.basesize -= 1
-            else:
-                self.basesize += 1
-            self.counter = 0
-        else:
-            self.counter += 1"""
-
+        self.mask = pygame.mask.from_surface(self.image)

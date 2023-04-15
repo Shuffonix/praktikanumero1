@@ -20,7 +20,7 @@ class Bullet(pygame.sprite.Sprite):
         self.collisions = 0
         self.last_porge = None
         self.dead = False
-        self.score = 50
+        self.gathered_score = 0
 
     # uuendab neid maagilisi asju siin, sest siin on seda kõige mugavam teha lol
     def collision(self, borders, enemies):
@@ -55,24 +55,23 @@ class Bullet(pygame.sprite.Sprite):
                 self.last_porge = border
                 self.rad = atan2(self.dy, -self.dx)
                 self.velocity *= 0.75
-                self.score -= 20
                 self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
 
-            """# collision detection enemy-tega
-            for e in enemies:
 
-                if self.rect.colliderect(e.return_rect()):
+            for e in enemies:
+                if pygame.sprite.collide_mask(self, e):
+                    e.got_hit = True
+                    self.gathered_score = e.worth
                     self.collisions += 1
                     self.velocity /= 2
-                    self.score += 50*e.basesize//10
-                    enemies.remove(e)"""
+                    e.kill()
         return particles
 
     def update(self, dt, borders, enemies, screen):
         if self.dead:
             self.kill()
-        #print(self.score)
+
         self.x += self.dx * dt * self.velocity
         self.y += self.dy * dt * self.velocity
 
@@ -88,4 +87,4 @@ class Bullet(pygame.sprite.Sprite):
             return particle_list
 
     def return_score(self):
-        return self.score
+        return self.gathered_score

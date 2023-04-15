@@ -189,7 +189,8 @@ while running:
                         death = Explosion(particle[2], 100)
                         death_particles.add(death)
                         bullet_explode_sound.play()
-                        score += bullet.score
+                        score += bullet.return_score()
+
             #if pygame.sprite.collide_mask(gun, bullet):
                 """if bullet.collisions > 0:
                     ingame = False
@@ -209,13 +210,12 @@ while running:
         if random.randint(1, 100) == 50 and len(enemies) < 2:
             for i in range(random.randint(1, 3)):
                 x, y = generate_enemy()
-                sceduled_enemies.append(Enemy(x, y))
+                sceduled_enemies.append(Enemy(x, y, round(random.uniform(0.75, 1.2), 2)))
         if random.randint(1, 100) % 17 == 0 and len(sceduled_enemies):
             enemies.add(sceduled_enemies[0])
             sceduled_enemies.pop(0)
 
         enemies.draw(screen)
-        #enemies.update()
         bullets.draw(screen)
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
