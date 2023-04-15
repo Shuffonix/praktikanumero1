@@ -2,6 +2,7 @@ import pygame
 
 
 class Gun(pygame.sprite.Sprite):
+
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((50, 15), pygame.SRCALPHA)
@@ -18,8 +19,6 @@ class Gun(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.last_value = None
         self.hit = False
-        self.bullettime = 0
-
 
     def update(self, x, y, degs, screen):
         now = pygame.time.get_ticks()
@@ -27,12 +26,11 @@ class Gun(pygame.sprite.Sprite):
         cooldown = int(min(0.49 * self.protsent, 49)) + 1
         cd_overlay = pygame.Surface((cooldown, 15), pygame.SRCALPHA)
 
-
+        # värvimise loogika(ish)
         if self.hit:
             cd_overlay.fill((255, 0, 0))
         else:
             cd_overlay.fill((255, 255, 255))
-
 
         self.cd_overlay = pygame.transform.rotozoom(cd_overlay, degs, 1)
         self.image = pygame.transform.rotozoom(self.origin, degs, 1)
@@ -48,4 +46,3 @@ class Gun(pygame.sprite.Sprite):
         else:
             self.cd_rect.left = self.rect.left
         self.mask = pygame.mask.from_surface(self.image)
-

@@ -4,11 +4,11 @@ import pygame
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, variation):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("images/enemy_image.png")
+        self.image = pygame.image.load("assets/enemy_image.png")
         self.image.set_colorkey((255, 255, 255))
         self.origin = self.image.copy()
         self.size = 1
-        self.variation = variation
+        self.variation = variation  # kiiruse random muutja
         self.image = pygame.transform.smoothscale(self.origin, (self.size, self.size))
         self.center = (x + 25, y + 25)
         self.rect = self.image.get_bounding_rect()
