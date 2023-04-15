@@ -2,43 +2,48 @@ import pygame
 
 
 # liikusin tagasi pygame Rect objekti peale, pildiga oli suuruse muutmine paras nuss
-class Enemy():
-    def __init__(self, screen, x, y):
-        self.boss = False
-        if self.boss:
-            self.colour = (0, 0, 255)
-        else:
-            self.colour = (255, 0, 0)
-        self.basesize = 24
-        self.screen = screen
-
-        self.x = x + 25
-        self.y = y + 25
-
-        self.circlerect = pygame.draw.circle(self.screen, self.colour, (self.x, self.y), 25-(self.basesize))
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/enemy_image.png")
+        self.image.set_colorkey((255, 255, 255))
+        self.origin = self.image.copy()
+        self.size = 1
+        self.image = pygame.transform.smoothscale(self.origin, (self.size, self.size))
+        self.center = (x, y)
+        self.rect = self.image.get_bounding_rect()
+        self.rect.center = self.center
         self.flag = False
-        self.counter = 0
+        self.birth = pygame.time.get_ticks()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.worth = 2
+        self.got_hit = False
 
-    def update(self, speed=0):
-        #print(self.circlerect)
-        if self.counter == 20:
-
+    def update(self, dt, bullets):
+        if self.got_hit:
+            return self.worth
+        now = pygame.time.get_ticks()
+        if now - self.birth < 3000:
+            self.size += 10 * dt
+        elif now - self.birth < 5500:
+            self.worth = 1
+            self.size -= 10 * dt
+        else:
+            self.kill()
+        self.image = pygame.transform.smoothscale(self.origin, (int(self.size), int(self.size)))
+        self.rect = self.image.get_bounding_rect()
+        self.rect.center = self.center
+        """if self.counter == 20:
             if self.basesize > 23:
                 self.flag = True
             elif self.basesize < 5:
                 self.flag = False
 
             if self.flag:
-                self.basesize -= 1 + speed
+                self.basesize -= 1
             else:
-                self.basesize += 1 + speed
+                self.basesize += 1
             self.counter = 0
         else:
-            self.counter += 1
-
-        self.circlerect = pygame.draw.circle(self.screen, (255, 0, 0), (self.x, self.y), 25-(self.basesize))
-
-    def return_rect(self):
-        return self.circlerect
-
+            self.counter += 1"""
 

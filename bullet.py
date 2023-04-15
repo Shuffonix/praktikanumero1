@@ -59,14 +59,14 @@ class Bullet(pygame.sprite.Sprite):
                 self.image = pygame.transform.rotozoom(self.origin, degrees(pi + self.rad), 1)
                 self.mask = pygame.mask.from_surface(self.image)
 
-            # collision detection enemy-tega
+            """# collision detection enemy-tega
             for e in enemies:
 
                 if self.rect.colliderect(e.return_rect()):
                     self.collisions += 1
                     self.velocity /= 2
                     self.score += 50*e.basesize//10
-                    enemies.remove(e)
+                    enemies.remove(e)"""
         return particles
 
     def update(self, dt, borders, enemies, screen):

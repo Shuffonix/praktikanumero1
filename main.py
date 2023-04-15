@@ -49,7 +49,6 @@ borders = pygame.sprite.Group()
 
 # enemies
 enemies = []
-enemies.append(Enemy(screen, 350, 350))
 
 def time_to_size(particle_time):
     if particle_time > 0.9:
@@ -205,13 +204,13 @@ while running:
 
         # enemy loogika
         for e in enemies:
-            e.update(random.uniform(-1, 1))
+            e.update(dt, bullets)
 
         # enemy spawnimise loogika
         if random.randint(1, 100) == 50 and len(enemies) < 2:
             for i in range(random.randint(1, 3)):
                 x, y = generate_enemy()
-                sceduled_enemies.append(Enemy(screen, x, y))
+                sceduled_enemies.append(Enemy(x, y))
         if random.randint(1, 100) % 17 == 0 and len(sceduled_enemies):
             enemies.append(sceduled_enemies[0])
             sceduled_enemies.pop(0)
