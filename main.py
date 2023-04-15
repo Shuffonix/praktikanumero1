@@ -9,12 +9,12 @@ pygame.init()
 
 font = pygame.font.SysFont("Times New Roman", 32)
 screen = pygame.display.set_mode((640, 480))
-background = pygame.image.load("star_background.png")
-title = pygame.image.load("title_icon.png")
+background = pygame.image.load("images/star_background.png")
+title = pygame.image.load("images/title_icon.png")
 title_rect = title.get_rect(center=(320, 70))
-newgame_button = pygame.image.load("newgame_button.png")
+newgame_button = pygame.image.load("images/newgame_button.png")
 newgame_rect = newgame_button.get_rect(center=(150, 400))
-return_button = pygame.image.load("returnmenu.png")
+return_button = pygame.image.load("images/returnmenu.png")
 return_rect = return_button.get_rect(center=(100, 100))
 
 gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
@@ -78,9 +78,9 @@ map_selection = [[[50, 250], [400, 200], [300, 350]],
 # genereerib need plokkid maailma, kasutades grid süsteemi, ettevalitud listist, sest ma ei saanud seda muidu TÖÖÖLE!
 nr = random.randint(0, len(map_selection)-1)
 for l in map_selection[nr]:
-    left_border = Border(l[0], l[1], 50, 90, 1)
+    left_border = Border(l[0], l[1], 50, 270, 1)
     right_border = Border(l[0]+50, l[1], 50, 90, 1)
-    top_border = Border(l[0], l[1], 50, 0, 1)
+    top_border = Border(l[0], l[1], 50, 180, 1)
     bottom_border = Border(l[0], l[1]+50, 50, 0, 1)
     for border in [top_border, left_border, right_border, bottom_border]:
         borders.add(border)
@@ -205,8 +205,8 @@ while running:
             e.update(random.uniform(0, 1))
 
         # enemy spawnimise loogika
-        if random.randint(1, 100) == 50 and len(enemies) < 3:
-            for i in range(random.randint(1, 5)):
+        if random.randint(1, 100) == 50 and len(enemies) < 2:
+            for i in range(random.randint(1, 3)):
                 x, y = generate_enemy()
                 sceduled_enemies.append(Enemy(screen, x, y))
         if random.randint(1, 100) % 17 == 0 and len(sceduled_enemies):
