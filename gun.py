@@ -16,13 +16,24 @@ class Gun(pygame.sprite.Sprite):
         self.cd_rect = self.cd_overlay.get_bounding_rect()
         self.protsent = 100
         self.mask = pygame.mask.from_surface(self.image)
+        self.last_value = None
+        self.hit = False
+        self.bullettime = 0
+
 
     def update(self, x, y, degs, screen):
         now = pygame.time.get_ticks()
         self.protsent = min(int((now - self.last_shot)/5), 100)
         cooldown = int(min(0.49 * self.protsent, 49)) + 1
         cd_overlay = pygame.Surface((cooldown, 15), pygame.SRCALPHA)
-        cd_overlay.fill((255, 255, 255))
+
+
+        if self.hit:
+            cd_overlay.fill((255, 0, 0))
+        else:
+            cd_overlay.fill((255, 255, 255))
+
+
         self.cd_overlay = pygame.transform.rotozoom(cd_overlay, degs, 1)
         self.image = pygame.transform.rotozoom(self.origin, degs, 1)
         self.rect = self.image.get_rect(center=self.center)

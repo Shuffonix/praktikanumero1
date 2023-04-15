@@ -8,7 +8,7 @@ from enemy import Enemy
 pygame.init()
 
 font = pygame.font.Font('images/aesymatt.ttf', 24)
-screen = pygame.display.set_mode((800, 480))
+screen = pygame.display.set_mode((640, 480+50))
 background = pygame.image.load("images/star_background.png")
 title = pygame.image.load("images/title_icon.png")
 title_rect = title.get_rect(center=(320, 70))
@@ -16,6 +16,11 @@ newgame_button = pygame.image.load("images/newgame_button.png")
 newgame_rect = newgame_button.get_rect(center=(150, 400))
 return_button = pygame.image.load("images/returnmenu.png")
 return_rect = return_button.get_rect(center=(100, 100))
+heart = pygame.image.load("images/heart.png")
+#heart = heart.set_colorkey((255, 255, 255, 255))
+heart = pygame.transform.scale(heart, (50, 50))
+print(heart.get_size())
+
 
 gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
 gun_sound.set_volume(0.5)
@@ -27,15 +32,21 @@ bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
 bullet_explode_sound.set_volume(0.5)
 pygame.mixer.set_num_channels(20)
 
-score_board = pygame.Surface((160, 50))
+score_board = pygame.Surface((640, 60))
 def update_scoreboard(score):
     score_board.fill((0, 0, 0))
     if score > 1000:
-
         text_surface = font.render(f'Score: {round(score/1000, 2)}k', True, (255, 255, 255))
     else:
         text_surface = font.render(f'Score: {score}', True, (255, 255, 255))
-    score_board.blit(text_surface, dest=(0, 0))
+    score_board.blit(text_surface, dest=(10, 25))
+
+lives_board = pygame.Surface((400, 60))
+def update_lives():
+    lives_board.fill((0, 0, 0))
+    for x in range(lives):
+        lives_board.blit(heart, dest=(300-x*60, 10))
+
 
 running = True
 menu = True
@@ -116,8 +127,9 @@ def generate_enemy():
     return random.choice(spawn_area)
 
 sceduled_enemies = []
-score = 900
-
+score = 0
+lives = 3
+hit_time = 0
 
 while running:
 
@@ -172,8 +184,9 @@ while running:
         rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
 
         update_scoreboard(score)
-        screen.blit(score_board, dest=(650, 50))
-
+        update_lives()
+        screen.blit(score_board, dest=(0, 460))
+        screen.blit(lives_board, dest=(280, 465))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 ingame = False
@@ -191,7 +204,8 @@ while running:
 
         screen.blit(background, (0, 0))
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
-
+        if hit_time != 0 and pygame.time.get_ticks() - hit_time > 2000:
+            gun.hit = False
         for bullet in bullets:
             particles_raw = bullet.update(dt, borders, enemies, screen)
             if particles_raw:
@@ -205,13 +219,23 @@ while running:
                         bullet_explode_sound.play()
                         score += bullet.return_score()
 
-            #if pygame.sprite.collide_mask(gun, bullet):
-                """if bullet.collisions > 0:
+            if pygame.sprite.collide_mask(gun, bullet):
+
+
+                if bullet.collisions > 0 and gun.last_value != bullet.collisions:
+                    bullet.velocity /= 2
+                    gun.hit = True
+                    hit_time = pygame.time.get_ticks()
+                    lives -= 1
+                    gun.last_value = bullet.collisions
+
+                print(bullet.collisions)
+                if lives == 0:
                     ingame = False
                     endgame = True
                     pygame.mixer.stop()
                     game_end_sound.play()
-                    break"""
+                    break
 
         death_particles.update()
         # ekraanile joonistamine
