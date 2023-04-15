@@ -202,7 +202,7 @@ while running:
 
         # enemy loogika
         for e in enemies:
-            e.update()
+            e.update(random.uniform(0, 1))
 
         # enemy spawnimise loogika
         if random.randint(1, 100) == 50 and len(enemies) < 3:

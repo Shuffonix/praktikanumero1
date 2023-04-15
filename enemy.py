@@ -12,7 +12,7 @@ class Enemy():
         self.flag = False
         self.counter = 0
 
-    def update(self):
+    def update(self, speed=0):
         #print(self.circlerect)
         if self.counter == 20:
 
@@ -22,9 +22,9 @@ class Enemy():
                 self.flag = False
 
             if self.flag:
-                self.basesize -= 1
+                self.basesize -= 1 + speed
             else:
-                self.basesize += 1
+                self.basesize += 1 + speed
             self.counter = 0
         else:
             self.counter += 1
