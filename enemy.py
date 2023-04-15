@@ -31,7 +31,6 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.kill()
         self.image = pygame.transform.smoothscale(self.origin, (int(self.size), int(self.size)))
-        print(self.image.get_size())
         self.rect = self.image.get_bounding_rect()
         self.rect.center = self.center
         """if self.counter == 20:

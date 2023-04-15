@@ -84,17 +84,21 @@ def generate_obstacles():
     sidewalls = []
     nr = random.randint(0, len(map_selection)-1)
     for l in map_selection[nr]:
-        left = Border(l[0], l[1], 50, 90, 1)
+        left = Border(l[0] - 1, l[1]+1, 50, 270, 2)
         sidewalls.append(left)
 
-        right = Border(l[0] + 50, l[1], 50, 90, 1)
+        right = Border(l[0] + 49, l[1], 50, 90, 1)
         sidewalls.append(right)
 
-        top = Border(l[0], l[1], 50, 0, 1)
+        top = Border(l[0], l[1] - 1, 50, 180, 2)
         sidewalls.append(top)
 
-        bottom = Border(l[0], l[1] + 50, 50, 0, 1)
+        bottom = Border(l[0] + 1, l[1] + 50, 50, 0, 2)
         sidewalls.append(bottom)
+
+        middle = Border(l[0] + 25, l[1] + 25, 2, 0, 2)
+        sidewalls.append(middle)
+
     return sidewalls
 
 
@@ -152,8 +156,6 @@ def spawn_enemy():
         point = Enemy(center[0], center[1])
     enemies.add(point)
 
-
-sceduled_enemies = []
 
 while running:
     bullet = False
