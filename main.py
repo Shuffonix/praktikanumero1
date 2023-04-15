@@ -30,9 +30,12 @@ pygame.mixer.set_num_channels(20)
 score_board = pygame.Surface((160, 50))
 def update_scoreboard(score):
     score_board.fill((0, 0, 0))
-    text_surface = font.render(f'Score: {score}', True, (255, 255, 255))
+    if score > 1000:
 
-    score_board.blit(text_surface, dest=(10, 0))
+        text_surface = font.render(f'Score: {round(score/1000, 2)}k', True, (255, 255, 255))
+    else:
+        text_surface = font.render(f'Score: {score}', True, (255, 255, 255))
+    score_board.blit(text_surface, dest=(0, 0))
 
 running = True
 menu = True
@@ -97,22 +100,23 @@ bottom_border = Border(10, 460, 620, 180)
 for border in [top_border, left_border, right_border, bottom_border]:
     borders.add(border)
 
+def generate_enemy_grid():
+    # enemy spawnimise süsteem
+    dont_spawn =[ [250, 200], [250, 250], [300, 200], [300, 200], [300, 250]]  # arvestasin playeri dimensioonid siia sisse
+    spawn_area = []
 
+    for x in range(50, 550, 50):
+        for y in range(50, 450, 50):
+            if [x, y] not in map_selection[nr] and [x, y] not in dont_spawn:
+                spawn_area.append([x, y])
+    return spawn_area
 
-# enemy spawnimise süsteem
-dont_spawn =[ [250, 200], [250, 250], [300, 200], [300, 200], [300, 250]]  # arvestasin playeri dimensioonid siia sisse
 spawn_area = []
-
-for x in range(50, 550, 50):
-    for y in range(50, 450, 50):
-        if [x, y] not in map_selection[nr] and [x, y] not in dont_spawn:
-            spawn_area.append([x, y])
-
 def generate_enemy():
     return random.choice(spawn_area)
 
 sceduled_enemies = []
-score = 0
+score = 900
 
 
 while running:
@@ -154,6 +158,7 @@ while running:
                 death_particles.add(Explosion(newgame_rect.center, 250))
 
         pygame.display.update()
+        spawn_area = generate_enemy_grid()
     bullet.kill()
 
 
