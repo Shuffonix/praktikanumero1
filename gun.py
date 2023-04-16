@@ -17,7 +17,6 @@ class Gun(pygame.sprite.Sprite):
         self.cd_rect = self.cd_overlay.get_bounding_rect()
         self.protsent = 100
         self.mask = pygame.mask.from_surface(self.image)
-        self.last_value = None
         self.hit = False
 
     def update(self, x, y, degs, screen):

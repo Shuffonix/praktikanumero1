@@ -30,8 +30,6 @@ class Bullet(pygame.sprite.Sprite):
             if pygame.sprite.collide_mask(self, border):
                 if border == self.last_porge:
                     continue
-
-
                 if border.angle % 180 == 0:
                     self.dy *= -1
                 else:
