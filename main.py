@@ -24,6 +24,8 @@ return_button = pygame.image.load("assets/returnmenu.png")
 return_rect = return_button.get_rect(center=(150, 400))
 death_msg = pygame.image.load("assets/deathmessage.png")
 death_rect = death_msg.get_rect(center=(320, 70))
+leaderboard_button = pygame.image.load("assets/leaderboard.png")
+leaderboard_rect = leaderboard_button.get_rect(center=(450, 400))
 heart = pygame.image.load("assets/heart.png")
 heart = pygame.transform.scale(heart, (50, 50))
 
@@ -42,6 +44,7 @@ running = True
 menu = True
 ingame = False
 endgame = False
+leaderboard = False
 
 clock = pygame.time.Clock()
 
@@ -144,6 +147,22 @@ def update_lives():
         lives_board.blit(heart, dest=(300-i*60, 10))
 
 
+leaderboard_surface = pygame.Surface((300, 400))
+last_fetch = None
+data = None
+
+def update_leaderboard():
+    global last_fetch
+    global data
+    if last_fetch == None or pygame.time.get_ticks() - last_fetch > 40000:
+        data = query_data()
+        last_fetch = pygame.time.get_ticks()
+
+    for i, d in enumerate(data):
+        text_surface = font.render(f'{i+1}.  {d[0]}: {d[1]}', True, (255, 255, 255))
+        leaderboard_surface.blit(text_surface, dest=(10, 25*(i+1)))
+
+
 while running:
     # Esimenüü jaoks vajalikud asjad
     bullets = pygame.sprite.Group()  # hoiustan siin aktiivseid kuule
@@ -152,9 +171,10 @@ while running:
     enemies = pygame.sprite.Group()
     sceduled_enemies = []
 
-    gun_group = pygame.sprite.Group()
-    gun = Gun(320, 240)
-    gun_group.add(gun)
+    if not leaderboard:
+        gun_group = pygame.sprite.Group()
+        gun = Gun(320, 240)
+        gun_group.add(gun)
 
     borders = pygame.sprite.Group()
     for border in mainseinad:
@@ -164,6 +184,26 @@ while running:
     score = 0
     lives = 3
     hit_time = 0
+
+    while leaderboard:
+        dt = clock.tick(144) / 1000
+        screen.fill((0, 0, 0))
+
+        update_leaderboard()
+        screen.blit(leaderboard_button, (200, 50))
+        screen.blit(leaderboard_surface, (220, 120))
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
+        gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
+
+        gun_group.draw(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                leaderboard = False
+                running = False
+                break
+        pygame.display.update()
+
 
     while menu:
         dt = clock.tick(144) / 1000
@@ -176,6 +216,8 @@ while running:
         gun_group.draw(screen)
         screen.blit(gun.cd_overlay, gun.cd_rect)
         screen.blit(newgame_button, newgame_rect)
+        screen.blit(leaderboard_button, leaderboard_rect)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 menu = False
@@ -190,6 +232,14 @@ while running:
                     bullet = Bullet(rads)
                     bullets.add(bullet)
                     gun_sound.play()
+        if leaderboard_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
+            if mouse_presses[0]:
+                now = pygame.time.get_ticks()
+                if now - gun.last_shot > 500:
+                    gun.last_shot = now
+                    bullet = Bullet(rads)
+                    bullets.add(bullet)
+                    gun_sound.play()
 
         if bullet:
             bullet.update(dt, borders, enemies, screen)
@@ -197,6 +247,14 @@ while running:
             if bullet.rect.colliderect(newgame_rect):
                 menu = False
                 ingame = True
+                death_particles.add(Explosion(newgame_rect.center, 250))
+            if bullet.rect.colliderect(leaderboard_rect):
+                menu = False
+                ingame = False
+                leaderboard = True
+                gun_group.empty()
+                new_gun = Gun(319, 440)
+                gun_group.add(new_gun)
                 death_particles.add(Explosion(newgame_rect.center, 250))
 
         pygame.display.update()

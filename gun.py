@@ -32,6 +32,7 @@ class Gun(pygame.sprite.Sprite):
             cd_overlay.fill((255, 255, 255))
 
         self.cd_overlay = pygame.transform.rotozoom(cd_overlay, degs, 1)
+        print(degs)
         self.image = pygame.transform.rotozoom(self.origin, degs, 1)
         self.rect = self.image.get_rect(center=self.center)
         self.cd_rect = self.cd_overlay.get_rect()
