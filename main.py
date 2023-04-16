@@ -185,6 +185,11 @@ while running:
     lives = 3
     hit_time = 0
 
+    bullet = False
+    hit_time = 0
+
+    for bullet in bullets:
+        bullet.kill()
     while leaderboard:
         dt = clock.tick(144) / 1000
         screen.fill((0, 0, 0))
@@ -193,15 +198,40 @@ while running:
         screen.blit(leaderboard_button, (200, 50))
         screen.blit(leaderboard_surface, (220, 120))
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
+        rads = get_angle(new_gun.rect.centerx, new_gun.rect.centery, mouse_x, mouse_y)
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
-
+        return_rect = return_button.get_rect(center=(520, 440))
+        screen.blit(return_button, return_rect)
         gun_group.draw(screen)
+        screen.blit(new_gun.cd_overlay, new_gun.cd_rect)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 leaderboard = False
                 running = False
                 break
+        mouse_presses = pygame.mouse.get_pressed()
+        if return_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
+            if mouse_presses[0]:
+                now = pygame.time.get_ticks()
+                if now - gun.last_shot > 500:
+                    gun.last_shot = now
+                    bullet = Bullet(rads, x=100, y=440)
+                    bullets.add(bullet)
+                    gun_sound.play()
+        if bullet:
+            bullet.update(dt, borders, enemies, screen)
+            bullets.draw(screen)
+            if bullet.rect.colliderect(return_rect):
+                menu = True
+                leaderboard = False
+                endgame = False
+                gun_group.empty()
+                gun = Gun(320, 240)
+                gun_group.add(gun)
+                for bullet in bullets:
+                    bullet.kill()
+                bullet = False
+                death_particles.add(Explosion(return_rect.center, 250))
         pygame.display.update()
 
 
@@ -253,7 +283,7 @@ while running:
                 ingame = False
                 leaderboard = True
                 gun_group.empty()
-                new_gun = Gun(319, 440)
+                new_gun = Gun(100, 440)
                 gun_group.add(new_gun)
                 death_particles.add(Explosion(newgame_rect.center, 250))
 

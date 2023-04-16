@@ -5,7 +5,7 @@ from random import randint
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self, rad):
+    def __init__(self, rad, x=320, y=240):
         pygame.sprite.Sprite.__init__(self)
         self.bounces = 0
         self.velocity = 1000
@@ -15,8 +15,8 @@ class Bullet(pygame.sprite.Sprite):
         self.origin = pygame.image.load("assets/bullet_image.png")
         self.image = pygame.transform.rotozoom(self.origin, degrees(self.rad), 1)
         self.rect = self.image.get_rect()
-        self.x = 320
-        self.y = 240
+        self.x = x
+        self.y = y
         self.mask = pygame.mask.from_surface(self.image)
         self.collisions = 0
         self.last_porge = None
