@@ -8,6 +8,8 @@ from border import Border
 from explosion import Explosion
 from enemy import Enemy
 
+from database import query_data, add_player
+
 pygame.init()
 
 font = pygame.font.Font('assets/aesymatt.ttf', 24)
@@ -202,7 +204,8 @@ while running:
     for obstacle in obstacles:
         borders.add(obstacle)
     spawn_area = generate_enemy_grid()
-    bullet.kill()
+    if bullet:
+        bullet.kill()
 
     # Mängu osa
     while ingame:
