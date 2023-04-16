@@ -21,11 +21,15 @@ title_rect = title.get_rect(center=(320, 70))
 newgame_button = pygame.image.load("assets/newgame_button.png")
 newgame_rect = newgame_button.get_rect(center=(150, 400))
 return_button = pygame.image.load("assets/returnmenu.png")
-return_rect = return_button.get_rect(center=(150, 400))
+return_rect = return_button.get_rect(center=(120, 400))
 death_msg = pygame.image.load("assets/deathmessage.png")
 death_rect = death_msg.get_rect(center=(320, 70))
+submit_button = pygame.image.load("assets/img.png")
+submit_rect = submit_button.get_rect(center=(470, 400))
 leaderboard_button = pygame.image.load("assets/leaderboard.png")
 leaderboard_rect = leaderboard_button.get_rect(center=(450, 400))
+save_button = pygame.image.load("assets/save.png")
+save_rect = leaderboard_button.get_rect(center=(450, 400))
 heart = pygame.image.load("assets/heart.png")
 heart = pygame.transform.scale(heart, (50, 50))
 
@@ -45,6 +49,7 @@ menu = True
 ingame = False
 endgame = False
 leaderboard = False
+submit = False
 
 clock = pygame.time.Clock()
 
@@ -148,6 +153,11 @@ def update_lives():
 
 
 leaderboard_surface = pygame.Surface((300, 400))
+submit_box = pygame.Surface((300, 60))
+submit_box_rect = pygame.Rect(220, 150, 220, 60)
+can_type = False
+written_text = ""
+
 last_fetch = None
 data = None
 
@@ -163,6 +173,9 @@ def update_leaderboard():
         leaderboard_surface.blit(text_surface, dest=(10, 25*(i+1)))
 
 
+new_gun = None
+
+
 while running:
     # Esimenüü jaoks vajalikud asjad
     bullets = pygame.sprite.Group()  # hoiustan siin aktiivseid kuule
@@ -171,7 +184,7 @@ while running:
     enemies = pygame.sprite.Group()
     sceduled_enemies = []
 
-    if not leaderboard:
+    if menu:
         gun_group = pygame.sprite.Group()
         gun = Gun(320, 240)
         gun_group.add(gun)
@@ -185,11 +198,72 @@ while running:
     lives = 3
     hit_time = 0
 
-    bullet = False
-    hit_time = 0
 
     for bullet in bullets:
         bullet.kill()
+    if new_gun:
+        gun_group.empty()
+        new_gun = Gun(100, 440)
+        gun_group.add(new_gun)
+    while submit:
+        can_write = True
+
+
+
+        dt = clock.tick(144) / 1000
+        screen.fill((0, 0, 0))
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        rads = get_angle(new_gun.rect.centerx, new_gun.rect.centery, mouse_x, mouse_y)
+        gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
+        gun_group.draw(screen)
+        screen.blit(new_gun.cd_overlay, new_gun.cd_rect)
+        pygame.draw.rect(screen, (255, 255, 255), submit_box_rect, 1)
+        # save_rect = return_button.get_rect(center=(450, 440))
+
+        screen.blit(save_button, save_rect)
+        if len(written_text) < 20:
+            text = font.render(f'Name: {written_text}', True, (255, 255, 255))
+            submit_box.blit(text, dest=(10, 25))
+        screen.blit(submit_box, submit_box_rect)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                submit = False
+                running = False
+                break
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+
+                    written_text[0:len()]
+                else:
+                    written_text += pygame.key.name(event.key)
+
+
+        mouse_presses = pygame.mouse.get_pressed()
+        if save_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
+            if mouse_presses[0]:
+                now = pygame.time.get_ticks()
+                if now - gun.last_shot > 500:
+                    gun.last_shot = now
+                    bullet = Bullet(rads, x=100, y=440)
+                    bullets.add(bullet)
+                    # bullet = True
+                    gun_sound.play()
+        if bullet:
+            print('here!')
+            bullet.update(dt, borders, enemies, screen)
+            bullets.draw(screen)
+            if bullet.rect.colliderect(save_rect):
+                menu = True
+                ingame = False
+                submit = False
+                endgame = False
+
+                bullet = False
+                death_particles.add(Explosion(newgame_rect.center, 250))
+
+        pygame.display.update()
+
     while leaderboard:
         dt = clock.tick(144) / 1000
         screen.fill((0, 0, 0))
@@ -411,6 +485,12 @@ while running:
         screen.fill((0, 0, 0))
         screen.blit(return_button, return_rect)
         screen.blit(death_msg, death_rect)
+        text_surface = pygame.Surface((320, 60))
+        text = font.render(f'Your score: {score}', True, (255, 255, 255))
+        text_surface.blit(text, dest=(125, 25))
+        screen.blit(text_surface, dest=(110, 120))
+        screen.blit(submit_button, submit_rect)
+
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rads = get_angle(gun.rect.centerx, gun.rect.centery, mouse_x, mouse_y)
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
@@ -424,7 +504,7 @@ while running:
                 ingame = False
                 break
         mouse_presses = pygame.mouse.get_pressed()
-        if return_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
+        if return_rect.collidepoint(pygame.mouse.get_pos()) or submit_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
             if mouse_presses[0]:
                 now = pygame.time.get_ticks()
                 if now - gun.last_shot > 500:
@@ -438,6 +518,15 @@ while running:
             if bullet.rect.colliderect(return_rect):
                 menu = True
                 endgame = False
+                death_particles.add(Explosion(return_rect.center, 250))
+            if bullet.rect.colliderect(submit_rect):
+                print('jere!')
+                submit = True
+                endgame = False
+                new_gun = Gun(100, 440)
+                for bullet in bullets:
+                    bullet.kill()
+                bullet = False
                 death_particles.add(Explosion(return_rect.center, 250))
         pygame.display.update()
 pygame.quit()
