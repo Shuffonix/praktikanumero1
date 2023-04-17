@@ -43,5 +43,3 @@ def query_data():
     resp = cursor.fetchall()
     cursor.close()
     return resp
-
-connection.close()
