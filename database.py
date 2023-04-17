@@ -25,7 +25,7 @@ create_db = '''CREATE TABLE SCORES(
 def add_player(name, score):
     cursor = connection.cursor()
     script = "INSERT INTO SCORES(NAME, SCORE) VALUES (%s, %s)"
-    cursor.executemany(script, [name, score])
+    cursor.execute(script, [name, score])
     connection.commit()
     cursor.close()
 

@@ -153,10 +153,12 @@ def update_lives():
 
 
 leaderboard_surface = pygame.Surface((300, 400))
-submit_box = pygame.Surface((300, 60))
+submit_box = pygame.Surface((230, 60))
 submit_box_rect = pygame.Rect(220, 150, 220, 60)
+submit_box_rect2 = pygame.Rect(210, 145, 255, 70)
 can_type = False
 written_text = ""
+visible = (0, 0, 0)
 
 last_fetch = None
 data = None
@@ -174,7 +176,7 @@ def update_leaderboard():
 
 
 new_gun = None
-
+score = 0
 
 while running:
     # Esimenüü jaoks vajalikud asjad
@@ -194,7 +196,7 @@ while running:
         borders.add(border)
 
     bullet = False
-    score = 0
+
     lives = 3
     hit_time = 0
 
@@ -217,13 +219,15 @@ while running:
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
         gun_group.draw(screen)
         screen.blit(new_gun.cd_overlay, new_gun.cd_rect)
-        pygame.draw.rect(screen, (255, 255, 255), submit_box_rect, 1)
+        # pygame.draw.rect(screen, (255, 255, 255), submit_box_rect, 1)
         # save_rect = return_button.get_rect(center=(450, 440))
 
+        submit_box.fill((0, 0, 0))
         screen.blit(save_button, save_rect)
-        if len(written_text) < 20:
-            text = font.render(f'Name: {written_text}', True, (255, 255, 255))
-            submit_box.blit(text, dest=(10, 25))
+        pygame.draw.rect(screen, visible, submit_box_rect2, 1)
+
+        text = font.render(f'Name: {written_text}', True, (255, 255, 255))
+        submit_box.blit(text, dest=(5, 25))
         screen.blit(submit_box, submit_box_rect)
 
         for event in pygame.event.get():
@@ -231,15 +235,20 @@ while running:
                 submit = False
                 running = False
                 break
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and can_type:
                 if event.key == pygame.K_BACKSPACE:
 
-                    written_text[0:len()]
-                else:
+                    written_text = written_text[0:len(written_text)-1]
+                elif len(written_text) < 12:  # nii palju tähemärke saab olla
                     written_text += pygame.key.name(event.key)
 
 
         mouse_presses = pygame.mouse.get_pressed()
+        if submit_box_rect2.collidepoint(pygame.mouse.get_pos()) and not can_type:
+            if mouse_presses[0]:
+                can_type = True
+                visible = (255, 255, 255)
+
         if save_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
             if mouse_presses[0]:
                 now = pygame.time.get_ticks()
@@ -250,15 +259,23 @@ while running:
                     # bullet = True
                     gun_sound.play()
         if bullet:
-            print('here!')
+
             bullet.update(dt, borders, enemies, screen)
             bullets.draw(screen)
             if bullet.rect.colliderect(save_rect):
+                print(score)
+                add_player(written_text, score)
                 menu = True
                 ingame = False
                 submit = False
                 endgame = False
 
+                gun_group.empty()
+                gun = Gun(320, 240)
+                gun_group.add(gun)
+                for bullet in bullets:
+                    bullet.kill()
+                bullet = False
                 bullet = False
                 death_particles.add(Explosion(newgame_rect.center, 250))
 
@@ -518,9 +535,10 @@ while running:
             if bullet.rect.colliderect(return_rect):
                 menu = True
                 endgame = False
+                score = 0
                 death_particles.add(Explosion(return_rect.center, 250))
             if bullet.rect.colliderect(submit_rect):
-                print('jere!')
+
                 submit = True
                 endgame = False
                 new_gun = Gun(100, 440)
