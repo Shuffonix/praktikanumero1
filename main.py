@@ -269,6 +269,7 @@ while running:
                 ingame = False
                 submit = False
                 endgame = False
+                score = 0
 
                 gun_group.empty()
                 gun = Gun(320, 240)

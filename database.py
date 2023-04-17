@@ -1,10 +1,15 @@
+import base64
+
 import psycopg2
+import base64
+
+stuff = b'SVpUM1Z2aFh3TXh3S0Q4MUh5b09RN01QYlVGQVN3SkU='
 
 # establishing the connection
 connection = psycopg2.connect(
     database="pygame_project",
     user='pygame_project_user',
-    password='IZT3VvhXwMxwKD81HyoOQ7MPbUFASwJE',
+    password=base64.b64decode(stuff).decode('ascii'),
     host='dpg-cgu20a02qv2fdeb7n9qg-a.frankfurt-postgres.render.com',
     port='5432'
 )
@@ -38,3 +43,5 @@ def query_data():
     resp = cursor.fetchall()
     cursor.close()
     return resp
+
+connection.close()
