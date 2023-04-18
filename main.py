@@ -35,13 +35,15 @@ heart = pygame.transform.scale(heart, (50, 50))
 
 
 gun_sound = pygame.mixer.Sound("sounds/gun_fire.wav")
-gun_sound.set_volume(0.5)
+gun_sound.set_volume(0.3)
 wall_bang_sound = pygame.mixer.Sound("sounds/bullet_bounce.wav")
 wall_bang_sound.set_volume(0.2)
 game_end_sound = pygame.mixer.Sound("sounds/game_end.wav")
-game_end_sound.set_volume(0.5)
+game_end_sound.set_volume(0.3)
 bullet_explode_sound = pygame.mixer.Sound("sounds/bullet_explode.wav")
-bullet_explode_sound.set_volume(0.5)
+bullet_explode_sound.set_volume(0.3)
+music = pygame.mixer.Sound("sounds/spiderdance.wav")
+music.set_volume(0.05)
 pygame.mixer.set_num_channels(20)
 
 running = True
@@ -178,6 +180,8 @@ def update_leaderboard():
 new_gun = None
 score = 0
 
+
+music.play(loops=-1)
 while running:
     # Esimenüü jaoks vajalikud asjad
     bullets = pygame.sprite.Group()  # hoiustan siin aktiivseid kuule
@@ -186,10 +190,6 @@ while running:
     enemies = pygame.sprite.Group()
     sceduled_enemies = []
 
-    if menu:
-        gun_group = pygame.sprite.Group()
-        gun = Gun(320, 240)
-        gun_group.add(gun)
 
     borders = pygame.sprite.Group()
     for border in mainseinad:
@@ -292,8 +292,8 @@ while running:
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rads = get_angle(new_gun.rect.centerx, new_gun.rect.centery, mouse_x, mouse_y)
         gun_group.update(mouse_x, mouse_y, degrees(rads), screen)
-        return_rect = return_button.get_rect(center=(520, 440))
-        screen.blit(return_button, return_rect)
+        return2_rect = return_button.get_rect(center=(520, 440))
+        screen.blit(return_button, return2_rect)
         gun_group.draw(screen)
         screen.blit(new_gun.cd_overlay, new_gun.cd_rect)
         for event in pygame.event.get():
@@ -302,7 +302,7 @@ while running:
                 running = False
                 break
         mouse_presses = pygame.mouse.get_pressed()
-        if return_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
+        if return2_rect.collidepoint(pygame.mouse.get_pos()) and not bullet:
             if mouse_presses[0]:
                 now = pygame.time.get_ticks()
                 if now - gun.last_shot > 500:
@@ -313,7 +313,7 @@ while running:
         if bullet:
             bullet.update(dt, borders, enemies, screen)
             bullets.draw(screen)
-            if bullet.rect.colliderect(return_rect):
+            if bullet.rect.colliderect(return2_rect):
                 menu = True
                 leaderboard = False
                 endgame = False
@@ -325,7 +325,9 @@ while running:
                 bullet = False
                 death_particles.add(Explosion(return_rect.center, 250))
         pygame.display.update()
-
+    gun_group = pygame.sprite.Group()
+    gun = Gun(320, 240)
+    gun_group.add(gun)
 
     while menu:
         dt = clock.tick(144) / 1000
@@ -452,7 +454,7 @@ while running:
                 if lives == 0:
                     ingame = False
                     endgame = True
-                    pygame.mixer.stop()
+                    # pygame.mixer.stop()
                     game_end_sound.play()
                     break
 
