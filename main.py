@@ -166,9 +166,10 @@ last_fetch = None
 data = None
 
 def update_leaderboard():
+    leaderboard_surface.fill((0, 0, 0))
     global last_fetch
     global data
-    if last_fetch == None or pygame.time.get_ticks() - last_fetch > 40000:
+    if last_fetch == None or pygame.time.get_ticks() - last_fetch > 10000:
         data = query_data()
         last_fetch = pygame.time.get_ticks()
 
